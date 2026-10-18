@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goals (desktop)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+body{margin:0}
+.app{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--tx);min-height:100%}
+.h,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.nav{background:#000;display:flex;align-items:center;gap:28px;padding:0 32px;height:64px}
+.logo{color:#fff;font-size:24px;margin-right:20px}
+.nav a{color:#ABADB1;text-decoration:none;font-weight:500;font-size:15px;height:64px;display:flex;align-items:center;border-bottom:3px solid transparent;box-sizing:border-box}
+.nav a.on{color:#fff;border-color:#D20A0A}
+.me{margin-left:auto;color:#fff;font-weight:600;font-size:14px}
+.wrap{max-width:1200px;margin:0 auto;padding:32px;box-sizing:border-box}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.top h1{font-size:44px}
+.seg{display:flex;border:1px solid var(--ln)}
+.seg button{background:none;border:0;border-right:1px solid var(--ln);color:var(--mu);font:500 14px 'Barlow',sans-serif;padding:10px 16px;min-height:44px}
+.seg button:last-child{border:0}
+.seg .on{background:var(--tx);color:var(--bg)}
+.panel{background:var(--sf);border:1px solid var(--ln);padding:28px}
+.rec{display:flex;gap:56px;align-items:flex-end;flex-wrap:wrap}
+.num b{display:block;font:700 72px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}
+.num span,.sub{color:var(--mu);font-size:14px}
+.l b{color:var(--br)}.d b{color:var(--dr)}
+.meta{margin-left:auto;text-align:right}
+.meta b{font:700 32px/1.1 'Barlow Condensed',sans-serif;display:block}
+.bar{display:flex;height:6px;margin-top:24px}.bar i{display:block}
+.h2{font-size:22px;margin:32px 0 12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.row{display:grid;grid-template-columns:150px 1fr 28px 56px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln);font-size:15px}
+.row em{font-style:normal;color:var(--mu);text-align:right;font-variant-numeric:tabular-nums}
+.row b{text-align:right}
+.t{height:8px;background:var(--ln)}.t i{display:block;height:8px;background:var(--tx)}.t.a i{background:var(--br)}
+.ins p{margin:0;padding:12px 0;border-top:1px solid var(--ln);font-size:15px;line-height:1.45}
+.ins h3{font-size:20px;margin:0 0 8px}.s{color:var(--win)}.w{color:var(--bt)}
+@media(max-width:800px){.cols{grid-template-columns:1fr;gap:8px}.wrap{padding:20px}.nav{overflow-x:auto;gap:20px}.meta{margin-left:0;text-align:left}}
+
+.btn{background:var(--br);color:#fff;border:0;height:44px;padding:0 24px;font:700 18px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.g{display:grid;grid-template-columns:1fr 300px 110px 130px;gap:24px;align-items:center;padding:20px 0;border-top:1px solid var(--ln)}
+.g h3{margin:0 0 4px;font:600 18px 'Barlow',sans-serif}
+.pb{height:8px;background:var(--ln)}.pb i{display:block;height:8px;background:var(--br)}
+.v{font:700 28px/1 'Barlow Condensed',sans-serif;text-align:right;font-variant-numeric:tabular-nums}
+.st{border:1px solid var(--ln);padding:6px 10px;font-size:13px;font-weight:600;text-align:center}
+.st.ok{color:var(--win);border-color:var(--win)}.st.ex{color:var(--mu)}
+.lnk{display:block;margin-top:16px;color:var(--mu);font-size:14px}
+@media(max-width:800px){.g{grid-template-columns:1fr;gap:10px}.v{text-align:left}}
+</style>
+</head>
+<body>
+<div class="app" style="--bg:#F2F2F2;--sf:#fff;--tx:#191919;--mu:#585B63;--ln:#D5D6D8;--br:#D20A0A;--bt:#D20A0A;--win:#1F7A4A;--dr:#6B6E75">
+<nav class="nav" aria-label="Main"><span class="logo">MatForge</span><a href="#">Dashboard</a><a href="#">Training</a><a href="#">Competitions</a><a class="on" href="#">Goals</a><a href="#">Library</a><a href="#">Body</a><span class="me">Piotr Sarnecki</span></nav>
+<main class="wrap">
+<div class="top"><h1 class="h">Goals</h1><button class="btn">New goal</button></div>
+<div style="border-bottom:1px solid var(--ln)"><div class="g"><div><h3>20 trainings in October</h3><span class="sub">Training count, 1-31 Oct</span></div><div><div class="pb"><i style="width:60%"></i></div></div><div class="v">12 / 20</div><div class="st ">14 days left</div></div><div class="g"><div><h3>100 sparring rounds in Q4</h3><span class="sub">Sparring rounds, 1 Oct-31 Dec</span></div><div><div class="pb"><i style="width:48%"></i></div></div><div class="v">48 / 100</div><div class="st ">75 days left</div></div><div class="g"><div><h3>Prepare for Mazovia Cup</h3><span class="sub">Competition, 8 Nov</span></div><div><span class="sub">18 sessions since 15 Sep</span></div><div class="v">22 days</div><div class="st ">Countdown</div></div><div class="g"><div><h3>Learn the knee cut pass</h3><span class="sub">Manual goal</span></div><div><div class="pb"><i style="width:40%"></i></div></div><div class="v">40%</div><div class="st ">No end date</div></div><div class="g"><div><h3>15 trainings in September</h3><span class="sub">Training count, 1-30 Sep</span></div><div><div class="pb"><i style="width:100%"></i></div></div><div class="v">15 / 15</div><div class="st ok">Achieved</div></div><div class="g"><div><h3>10 sparring rounds in August</h3><span class="sub">Sparring rounds, 1-31 Aug</span></div><div><div class="pb"><i style="width:70%"></i></div></div><div class="v">7 / 10</div><div class="st ex">Expired</div></div></div>
+<a class="lnk" href="#">Show archived goals (2)</a>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log training (phone)</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+body{margin:0}
+.ph{width:390px;height:844px;box-sizing:border-box;background:#F2F2F2;color:#191919;font-family:'Barlow',sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.bar{background:#000;color:#fff;height:56px;display:flex;align-items:center;gap:8px;padding:0 8px;flex:none}
+.bar a{color:#fff;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.bar h1{font:700 24px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.body{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1}
+label,.lb{font-size:13px;font-weight:600;color:#585B63;display:block;margin-bottom:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select,input{width:100%;height:44px;box-sizing:border-box;border:1px solid #D5D6D8;background:#fff;padding:0 12px;font:500 15px 'Barlow',sans-serif;color:#191919;border-radius:2px}
+.seg{display:flex;border:1px solid #D5D6D8;background:#fff}
+.seg button{flex:1;height:44px;border:0;border-right:1px solid #D5D6D8;background:none;font:500 15px 'Barlow',sans-serif;color:#585B63}
+.seg button:last-child{border:0}.seg .on{background:#191919;color:#fff}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.big button{height:56px;border:2px solid #191919;background:#fff;font:700 22px 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#191919}
+.big .w{border-color:#1F7A4A;color:#1F7A4A}.big .l{border-color:#D20A0A;color:#D20A0A}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:40px;padding:0 12px;border:1px solid #D5D6D8;background:#fff;font:500 14px 'Barlow',sans-serif;color:#191919;display:flex;align-items:center;gap:8px}
+.chip i{width:8px;height:8px;display:block}
+.sum{font-size:14px;color:#585B63;margin:0}
+.save{flex:none;padding:12px 16px 20px;border-top:1px solid #D5D6D8}
+.save button{width:100%;height:52px;background:#D20A0A;color:#fff;border:0;font:700 20px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.03em}
+</style>
+</head>
+<body>
+
+
+<div class="ph">
+<header class="bar"><a href="#" aria-label="Back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a><h1>Log training</h1></header>
+<div class="body">
+<div class="seg" role="group" aria-label="Kind"><button class="on">Grappling</button><button>Other</button></div>
+<div class="g2"><div><label for="d">Date</label><input id="d" value="15 Oct 2026" readonly></div><div><label for="m">Duration</label><input id="m" value="90 min" readonly></div></div>
+<div><span class="lb">Feeling (1 = bad, 5 = great)</span><div class="seg" role="group" aria-label="Feeling"><button>1</button><button>2</button><button>3</button><button class="on">4</button><button>5</button></div></div>
+<div class="g2"><div><label for="a">Discipline</label><select id="a"><option>BJJ</option></select></div><div><label for="b">Format</label><select id="b"><option>No-Gi</option></select></div>
+<div><label for="c">Character</label><select id="c"><option>Sparring</option></select></div><div><label for="e">Club</label><select id="e"><option>Club A</option></select></div></div>
+<div><span class="lb">Rounds</span><div class="big"><button class="w">Win</button><button class="l">Loss</button><button>Draw</button></div></div>
+<div class="chips"><button class="chip"><i style="background:#1F7A4A"></i>1 Win, Rear Naked Choke</button><button class="chip"><i style="background:#D20A0A"></i>2 Loss, Inside Heel Hook</button><button class="chip"><i style="background:#6B6E75"></i>3 Draw</button><button class="chip"><i style="background:#1F7A4A"></i>4 Win, Triangle</button></div>
+<p class="sum">4 rounds: 2 W, 1 L, 1 D</p>
+</div>
+<div class="save"><button>Save session</button></div>
+</div>
+
+</body>
+</html>

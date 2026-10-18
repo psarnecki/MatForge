@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dashboard (desktop)</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+body{margin:0}
+.app{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--tx);min-height:100%}
+.h,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.nav{background:#000;display:flex;align-items:center;gap:28px;padding:0 32px;height:64px}
+.logo{color:#fff;font-size:24px;margin-right:20px}
+.nav a{color:#ABADB1;text-decoration:none;font-weight:500;font-size:15px;height:64px;display:flex;align-items:center;border-bottom:3px solid transparent;box-sizing:border-box}
+.nav a.on{color:#fff;border-color:#D20A0A}
+.me{margin-left:auto;color:#fff;font-weight:600;font-size:14px}
+.wrap{max-width:1200px;margin:0 auto;padding:32px;box-sizing:border-box}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.top h1{font-size:44px}
+.seg{display:flex;border:1px solid var(--ln)}
+.seg button{background:none;border:0;border-right:1px solid var(--ln);color:var(--mu);font:500 14px 'Barlow',sans-serif;padding:10px 16px;min-height:44px}
+.seg button:last-child{border:0}
+.seg .on{background:var(--tx);color:var(--bg)}
+.panel{background:var(--sf);border:1px solid var(--ln);padding:28px}
+.rec{display:flex;gap:56px;align-items:flex-end;flex-wrap:wrap}
+.num b{display:block;font:700 72px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}
+.num span,.sub{color:var(--mu);font-size:14px}
+.l b{color:var(--br)}.d b{color:var(--dr)}
+.meta{margin-left:auto;text-align:right}
+.meta b{font:700 32px/1.1 'Barlow Condensed',sans-serif;display:block}
+.bar{display:flex;height:6px;margin-top:24px}.bar i{display:block}
+.h2{font-size:22px;margin:32px 0 12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.row{display:grid;grid-template-columns:150px 1fr 28px 56px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln);font-size:15px}
+.row em{font-style:normal;color:var(--mu);text-align:right;font-variant-numeric:tabular-nums}
+.row b{text-align:right}
+.t{height:8px;background:var(--ln)}.t i{display:block;height:8px;background:var(--tx)}.t.a i{background:var(--br)}
+.ins p{margin:0;padding:12px 0;border-top:1px solid var(--ln);font-size:15px;line-height:1.45}
+.ins h3{font-size:20px;margin:0 0 8px}.s{color:var(--win)}.w{color:var(--bt)}
+@media(max-width:800px){.cols{grid-template-columns:1fr;gap:8px}.wrap{padding:20px}.nav{overflow-x:auto;gap:20px}.meta{margin-left:0;text-align:left}}
+</style>
+</head>
+<body>
+
+
+<div class="app" style="--bg:#F2F2F2;--sf:#fff;--tx:#191919;--mu:#585B63;--ln:#D5D6D8;--br:#D20A0A;--bt:#D20A0A;--win:#1F7A4A;--dr:#6B6E75">
+<nav class="nav" aria-label="Main"><span class="logo">MatForge</span><a class="on" href="#">Dashboard</a><a href="#">Training</a><a href="#">Competitions</a><a href="#">Goals</a><a href="#">Library</a><a href="#">Body</a><span class="me">Piotr Sarnecki</span></nav>
+<main class="wrap">
+<div class="top"><h1 class="h">Dashboard</h1><div style="display:flex;gap:12px;flex-wrap:wrap"><select aria-label="Discipline" style="height:44px;border:1px solid var(--ln);background:var(--sf);padding:0 12px;font:500 14px 'Barlow',sans-serif;color:var(--tx)"><option>All disciplines</option></select><select aria-label="Format" style="height:44px;border:1px solid var(--ln);background:var(--sf);padding:0 12px;font:500 14px 'Barlow',sans-serif;color:var(--tx)"><option>All formats</option></select><div class="seg" role="group" aria-label="Period"><button>Last 30 days</button><button class="on">Last 90 days</button><button>This year</button><button>All time</button></div></div></div>
+<section class="panel" aria-label="Sparring record">
+<div class="rec"><div class="num"><b>42</b><span>Wins</span></div><div class="num l"><b>27</b><span>Losses</span></div><div class="num d"><b>9</b><span>Draws</span></div>
+<div class="meta"><b>53.8%</b><span class="sub">win rate over 78 rounds</span><br><span class="sub">+10.4 points vs previous 90 days</span></div></div>
+<div class="bar"><i style="width:53.8%;background:var(--win)"></i><i style="width:34.6%;background:var(--br)"></i><i style="width:11.6%;background:var(--dr)"></i></div>
+<h2 class="h h2">Win rate by week</h2>
+<svg viewBox="0 0 1136 120" preserveAspectRatio="none" width="100%" height="120" role="img" aria-label="Weekly win rate over 13 weeks, rising from 45% to 60%"><line x1="0" y1="60" x2="1136" y2="60" stroke="var(--ln)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><polyline fill="none" stroke="var(--br)" stroke-width="2.5" vector-effect="non-scaling-stroke" points="0,72.5 94.7,60 189.3,85 284,47.5 378.7,65 473.3,55 568,35 662.7,60 757.3,42.5 852,30 946.7,47.5 1041.3,40 1136,35"/></svg>
+</section>
+<div class="cols">
+<section><h2 class="h h2">Finishes for</h2>
+<div class="row"><span>Rear Naked Choke</span><span class="t"><i style="width:41.2%"></i></span><b>14</b><em>41.2%</em></div>
+<div class="row"><span>Triangle Choke</span><span class="t"><i style="width:23.5%"></i></span><b>8</b><em>23.5%</em></div>
+<div class="row"><span>Kimura</span><span class="t"><i style="width:17.6%"></i></span><b>6</b><em>17.6%</em></div>
+<div class="row"><span>Armbar</span><span class="t"><i style="width:11.8%"></i></span><b>4</b><em>11.8%</em></div>
+<div class="row"><span>Other Submission</span><span class="t"><i style="width:5.9%"></i></span><b>2</b><em>5.9%</em></div></section>
+<section><h2 class="h h2">Submitted by</h2>
+<div class="row"><span>Inside Heel Hook</span><span class="t a"><i style="width:42.1%"></i></span><b>8</b><em>42.1%</em></div>
+<div class="row"><span>Guillotine</span><span class="t a"><i style="width:26.3%"></i></span><b>5</b><em>26.3%</em></div>
+<div class="row"><span>Rear Naked Choke</span><span class="t a"><i style="width:21.1%"></i></span><b>4</b><em>21.1%</em></div>
+<div class="row"><span>Other Submission</span><span class="t a"><i style="width:10.5%"></i></span><b>2</b><em>10.5%</em></div></section>
+</div>
+<h2 class="h h2">Insights</h2>
+<div class="cols ins">
+<section><h3 class="h s">Strengths</h3><p>Rear Naked Choke makes up 41.2% of your finishes (14 of 34).</p><p>Chokes make up 64.7% of your finishes (22 of 34).</p><p>Back Control is your strongest position: 60.0% of your finishes with a recorded position (6 of 10).</p></section>
+<section><h3 class="h w">Weaknesses</h3><p>Inside Heel Hook makes up 42.1% of the submissions against you (8 of 19).</p><p>Half of your submission losses with a recorded position start from Leg Entanglement (6 of 12).</p></section>
+</div>
+<h2 class="h h2">Trend</h2><div class="ins"><p>Win rate is up 10.4 points compared with the previous 90 days.</p></div>
+</main>
+</div>
+
+</body>
+</html>
