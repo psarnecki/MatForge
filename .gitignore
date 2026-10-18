@@ -497,3 +497,6 @@ app.db
 
 # NLog
 **/logs/
+
+# Local environment variables (secrets)
+.env
