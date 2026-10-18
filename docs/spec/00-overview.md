@@ -58,7 +58,7 @@ Every decision below was made to keep implementation simple and fast. Change any
 | D-16 | One origin: the ASP.NET Core app serves the built frontend (static files with a fallback to `index.html`) and the API. Docker Compose has two services, `db` and `app`; the frontend is built inside the app's Dockerfile (Node is used only at build time). In development the Vite server proxies `/api` to the API. | Required for cookie auth without CORS; no extra nginx container. |
 | D-17 | Dictionaries: JSON seed files + idempotent seeder (upsert by `Code`, or by `(DisciplineId, Code)` for belts and formats, see `01-domain-model.md` §3; never delete). Demo data: optional seeder, deterministic. | Easy to review and extend; stable IDs. |
 | D-18 | No pagination in MVP (data volume per user is small). Sessions are queried by date range. | KISS. |
-| D-19 | .NET 10 (LTS), EF Core, SQL Server 2022 in Docker. | Current LTS. |
+| D-19 | .NET 10 (LTS), EF Core, SQL Server 2022 in Docker (not 2025). | Current .NET LTS. SQL Server 2022 is the more mature release with years of fixes; the 2025 additions (AI and vector features) are not used here. The same image is used in Docker Compose and in the integration tests. |
 | D-20 | Technique dictionary is global (all disciplines) and contains **submissions only**. Throws, sweeps, and points are not tracked as finishes. | Matches the thesis concept; keeps data simple. |
 | D-21 | Account deletion removes all user data in one transaction. | Privacy (GDPR right to erasure). |
 | D-22 | Hosting: local Docker Compose only (defense demo). | Simplest. |

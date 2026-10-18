@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MatForge.Api/MatForge.Api.csproj" />
+    <Project Path="src/MatForge.Application/MatForge.Application.csproj" />
+    <Project Path="src/MatForge.Data/MatForge.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MatForge.IntegrationTests/MatForge.IntegrationTests.csproj" />
+    <Project Path="tests/MatForge.UnitTests/MatForge.UnitTests.csproj" />
+  </Folder>
+</Solution>

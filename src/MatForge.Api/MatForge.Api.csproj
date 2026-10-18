@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\MatForge.Application\MatForge.Application.csproj" />
+  </ItemGroup>
+
+</Project>
