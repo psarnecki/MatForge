@@ -30,3 +30,13 @@ Not part of the MVP. Do these only after all MUST tasks (T01-T22) are finished a
 
 ## 7. Fuller root README with screenshots
 - Beyond the short README of T21: requirements, stack, project structure, and screenshots in `docs/design/shots/` linked from it.
+
+## 8. Test code coverage report
+- Add the `coverlet.collector` package to both test projects (it is part of the default `dotnet new xunit` template, removed in T01 to keep the MVP minimal).
+- Run `dotnet test --collect:"XPlat Code Coverage"`; the Cobertura XML report gives line and branch coverage per project for the thesis text.
+- Accept: a coverage report is produced for both test projects; the numbers are quoted in the thesis.
+
+## 9. File logging with NLog
+- The MVP logs to the console with the built-in `ILogger` (`docker compose logs app` shows it). NLog plugs in as a provider behind the same `ILogger<T>`, so no class that logs changes.
+- Add the `NLog.Web.AspNetCore` package, an `nlog.config` with a console target and a rolling file target (for example `logs/matforge-${shortdate}.log`), and `builder.Host.UseNLog()` in `Program.cs`. In Docker, map the log folder to a volume so the files survive container restarts.
+- Accept: logs appear in the console and in daily files; no logging code outside `Program.cs` changes.
