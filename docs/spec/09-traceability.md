@@ -31,7 +31,7 @@ Maps every point of the thesis concept to the place in this specification where 
 | Further details only in notes | 01 §4.4 (`Notes`); 00 out of scope | |
 | **3. Sparring register:** number of rounds, balance | 01 §4.5 (one row per round); 03 §4 `totals` | Count and balance are derived from the rows |
 | Round result win / loss / draw or no result | 01 §4.5 (`Result`) | `Draw` covers "no result" |
-| Finishing technique, if any | 01 §4.5 (`TechniqueId`), I-03 | From a dictionary (D-08) |
+| Finishing technique, if any | 01 §4.5 (`TechniqueId`), I-03, I-10 | From a dictionary (D-08). The concept says "submission technique"; extended to takedowns, throws, and pins so that wrestling, judo, and sambo have meaningful finishes (D-20). Offered per discipline (D-29) |
 | Side of the finish (who submitted whom) | Derived from `Result` | **Deviation (D-06):** no separate field, so data cannot contradict itself |
 | Optional position of the finish | 01 §4.5 (`PositionId`); D-07 | |
 | Optional note | 01 §4.5 (`Notes`) | |
@@ -63,7 +63,7 @@ Maps every point of the thesis concept to the place in this specification where 
 | Overall result | 01 §4.6 (`Place`, `ResultNote`) | Place as a number, 1-3 shown as medals |
 | Fight: opponent, notes | 01 §4.7 | |
 | Fight result win / loss | 01 §4.7 (`Result`) | `Draw` added |
-| Fight finish: submission, points, decision, etc. | 01 §4.7 (`Method`, `TechniqueId`), I-04 | Fixed list of methods |
+| Fight finish: submission, points, decision, etc. | 01 §4.7 (`Method`, `TechniqueId`), I-04 | Fixed list of methods; `Throw` and `Pin` added (D-20) |
 | Fight duration | 01 §4.7 (`DurationSeconds`) | |
 | No external API for competitions | n/a | Manual entry only |
 | **8. Body:** weight, height, body fat | 01 §4.10 | |
@@ -90,7 +90,7 @@ Maps every point of the thesis concept to the place in this specification where 
 
 | Concept | Specification |
 |---|---|
-| Consistent data model for a complex domain | 01 (ERD, constraints, invariants I-01 to I-09) |
+| Consistent data model for a complex domain | 01 (ERD, constraints, invariants I-01 to I-10) |
 | Multi-layer web system with authentication and authorization | 05 §2; 02 §2, §11; 01 §1 (isolation) |
 | Diary, sparring and fight registers | 01 §4.4-4.7; T06-T09 |
 | Rule-based analysis module | 03; T11-T13 |
@@ -110,9 +110,10 @@ Machine learning, event diary, PDF reports, technical tags on sessions. None is 
 | `Draw` result for fights | 01 §4.7 | Real events can end in a draw |
 | `AllowsRounds` rule per character | 01 §3; D-23 | Drills are not sparring |
 | Fixed fight methods and medal shortcuts | 01 §4.6-4.7 | Simplest consistent model |
+| Finishing actions beyond submissions (takedowns, throws, pins) and technique categories linked to disciplines | 01 §3, I-10; 07; D-20, D-29 | Wrestling and judo rounds rarely end by a submission; each athlete sees only relevant techniques |
 | Account deletion | 02 §2 | Privacy; small profile option |
 | Demo data seeder | 05 §2; T10 | Defense demo and analytics checks |
-| `/health` endpoint | 02 §1 | Docker startup order |
+| `/health` endpoint | 02 §1 | Quick check that the app (and from T02 the database) is up |
 | English UI with texts in one file | D-01 | Simplest option that keeps Polish possible |
 | Vite, React Router, TypeScript | D-15 | Minimum tooling for a React app |
 | Testcontainers | D-14; T02, T03 | Realistic integration tests |
