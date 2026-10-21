@@ -43,7 +43,7 @@
 ├─ docs/spec/                       this specification
 ├─ docs/design/                     mockups and other visual references (for example a Figma PDF)
 ├─ src/
-│  ├─ MatForge.Data/        Entities/, Configurations/, Migrations/, Seed/ (JSON), AppDbContext, ICurrentUser
+│  ├─ MatForge.Data/        Entities/, Enums/, Migrations/, Seed/ (JSON), AppDbContext, ICurrentUser
 │  ├─ MatForge.Application/ Features/ (per feature: service + interface, DTOs, validators, mapper), Analytics/ (Calculators/, Rules/)
 │  └─ MatForge.Api/         Controllers/, Infrastructure/ (exception handler, validation filter, CurrentUser), Program.cs, wwwroot/ (built frontend, git-ignored)
 ├─ tests/

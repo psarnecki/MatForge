@@ -10,7 +10,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: `docker compose up --build` starts everything; `GET /health` returns 200.
 
 **T02 Data model, database, seeding** [01, 07] (MUST)
-- All entities (including the `TechniqueCategoryDiscipline` link table), enums, EF configurations (string enums, precision, indexes, check constraint, delete behavior), first migration.
+- All entities (including the `TechniqueCategoryDiscipline` link table), enums, EF Core mapping (string enums, precision, indexes, check constraint, delete behavior), first migration.
 - Dictionary seeder from JSON files per `07-seed-data.md`; idempotent; it also syncs the category-discipline links.
 - Extend `GET /health` (from T01) with a database check (`AppDbContext.Database.CanConnectAsync()`): it returns 200 only when the database is reachable.
 - Integration test setup (first use): the `MatForge.IntegrationTests` project with one SQL Server container per test run (Testcontainers) that applies the production migrations. No `WebApplicationFactory` yet.

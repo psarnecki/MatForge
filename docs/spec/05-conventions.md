@@ -20,7 +20,8 @@ CQRS, MediatR, generic repository / unit-of-work, AutoMapper, generic base contr
 ## 2. Backend
 
 - **.NET 10**, C#, `Nullable` enabled, `TreatWarningsAsErrors` true, file-scoped namespaces, `.editorconfig` committed.
-- Dependency direction: `Api → Application → Data` (the three layers from the concept: API, business logic, data access). Entities, enums, `AppDbContext`, EF configurations, migrations, and seeding live in `Data`.
+- Dependency direction: `Api → Application → Data` (the three layers from the concept: API, business logic, data access). Entities, enums, `AppDbContext`, migrations, and seeding live in `Data`.
+- **EF Core mapping:** as much as possible with attributes on the entities (`[MaxLength]`, `[Precision]`, `[Index]`, `[PrimaryKey]`); the rest (relationships with delete behavior, the check constraint, enums stored as strings) in `AppDbContext.OnModelCreating` / `ConfigureConventions`, one commented block per rule. No separate configuration classes.
 - Packages: EF Core (SQL Server provider), ASP.NET Core Identity, FluentValidation, **Mapperly** (entity → DTO and create request → entity; on update the service copies the scalar fields and rebuilds child lists by hand; analytics results are built by calculators, not mapped), Serilog is **not** used (built-in `ILogger`), `Microsoft.AspNetCore.OpenApi` for the OpenAPI document and `Swashbuckle.AspNetCore.SwaggerUI` for the UI.
 - Structure by feature inside `Application`: `Features/Sessions/{ISessionService.cs, SessionService.cs, SessionDtos.cs, SessionValidators.cs, SessionMapper.cs}`; same for Competitions, Goals, Materials, Measurements, Profile, Analytics (`Calculators/`, `Rules/`).
 - Naming: `XxxService` with its interface `IXxxService` in the same folder, `XxxDto`, `CreateXxxRequest` / `UpdateXxxRequest`, `XxxValidator`, `XxxMapper`, controllers `XxxController`. Async methods end with `Async` and accept a `CancellationToken`. Tables plural; enums stored as strings.
@@ -61,6 +62,16 @@ Rules: a bug fix starts with a failing test. Tests name behavior (`Returns_404_w
 `docker-compose.yml` services: `db` (SQL Server 2022, volume, healthcheck) and `app` (multi-stage Dockerfile: one stage builds the frontend with Node, the next builds the API and copies the frontend into `wwwroot`; the app waits for the db, migrates and seeds on start, and serves `/api` plus the static frontend with a fallback to `index.html`). One command: `docker compose up --build`. App at `http://localhost:8080`. Variables in `.env` (template `.env.example`: `MSSQL_SA_PASSWORD`, `Seed__DemoData`, `TZ`).
 
 **Daily development (fast loop):** start only the database with `docker compose up db`, run the API from the IDE (debugger, hot reload) and the frontend with `npm run dev` (Vite proxy of `/api` to the API port). The full `docker compose up --build` is for end-to-end checks and the defense demo.
+
+**Migrations (author only, D-31).** Run from the repository root after changing the model:
+
+```
+dotnet ef migrations add <Name> --project src/MatForge.Data --startup-project src/MatForge.Api
+dotnet ef database update --project src/MatForge.Data --startup-project src/MatForge.Api
+dotnet ef migrations remove --project src/MatForge.Data --startup-project src/MatForge.Api
+```
+
+`add` creates the migration in `src/MatForge.Data/Migrations/`; `database update` applies it to the database from the user secrets; `remove` deletes the last migration if it has not been applied. Nobody else needs these commands: the app applies pending migrations at startup.
 
 ## 7. Definition of Done (every task)
 
