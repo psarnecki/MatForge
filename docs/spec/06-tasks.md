@@ -85,7 +85,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 ## Phase 6: Remaining modules and polish
 
 **T17 Materials library** [01 §4.9, 02 §8, 04 §4.7] (MUST)
-- Source detection with unit tests (including subdomains such as `www.`, `m.`, `vm.tiktok.com`), CRUD, status quick change, filters.
+- Source detection with unit tests (including subdomains such as `www.`, `m.`, `vm.tiktok.com`, `fb.watch`), CRUD, status quick change, filters.
 
 **T18 Body measurements** [01 §4.10, 02 §9, 04 §4.8] (MUST)
 - CRUD with unique date rule, chart.

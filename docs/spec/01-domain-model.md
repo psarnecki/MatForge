@@ -180,7 +180,7 @@ Progress, current value, and state are **computed on read**, never stored (`03-a
 |---|---|---|---|
 | Title | string(200) | yes | |
 | Url | string(500) | yes | absolute http(s) URL |
-| Source | enum `YouTube`, `Instagram`, `TikTok`, `Other` | yes | **detected on the server from the URL host**; not sent by the client |
+| Source | enum `YouTube`, `Instagram`, `TikTok`, `Facebook`, `Other` | yes | **detected on the server from the URL host**; not sent by the client |
 | CategoryId | int | no | `MaterialCategory` |
 | Status | enum `Saved`, `Watched`, `Practiced`, `Mastered` | yes | default `Saved` |
 | Notes | string(2000) | no | |

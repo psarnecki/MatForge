@@ -111,6 +111,6 @@ Submissions (`submissions`), Guard (`guard`), Guard Passing (`guard_passing`), S
 | Fight result | Win, Loss, Draw |
 | Fight method | Submission, Throw, Pin, Points, Decision, Disqualification, Walkover |
 | Goal type | TrainingCount, SparringRoundCount, CompetitionPrep, Manual |
-| Material source | YouTube, Instagram, TikTok, Other |
+| Material source | YouTube, Instagram, TikTok, Facebook, Other |
 | Material status | Saved, Watched, Practiced, Mastered |
 | Session kind | Grappling, Other |

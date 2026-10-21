@@ -163,7 +163,7 @@ Response adds computed fields: `currentValue` (int|null), `progress` (0..1|null)
 | PATCH | `/api/materials/{id}/status` | `{ status }` quick change |
 | DELETE | `/api/materials/{id}` | |
 
-Source detection by host (case-insensitive; the domain or any subdomain such as `www.`, `m.`, `vm.`): `youtube.com` and `youtu.be` → YouTube; `instagram.com` → Instagram; `tiktok.com` → TikTok; otherwise Other.
+Source detection by host (case-insensitive; the domain or any subdomain such as `www.`, `m.`, `vm.`): `youtube.com` and `youtu.be` → YouTube; `instagram.com` → Instagram; `tiktok.com` → TikTok; `facebook.com`, `fb.com`, and `fb.watch` → Facebook; otherwise Other.
 
 ## 9. Body measurements
 
