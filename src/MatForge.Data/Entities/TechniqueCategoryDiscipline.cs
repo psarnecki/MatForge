@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace MatForge.Data.Entities;
 
+[PrimaryKey(nameof(TechniqueCategoryId), nameof(DisciplineId))]
 public class TechniqueCategoryDiscipline
 {
     public int TechniqueCategoryId { get; set; }

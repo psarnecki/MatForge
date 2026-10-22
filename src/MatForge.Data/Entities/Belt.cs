@@ -1,5 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace MatForge.Data.Entities;
 
+// Belt codes are unique within a discipline
+[Index(nameof(DisciplineId), nameof(Code), IsUnique = true)]
 public class Belt : DictionaryEntity
 {
     public int DisciplineId { get; set; }
