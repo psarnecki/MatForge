@@ -1,0 +1,14 @@
+[
+  { "code": "submissions", "name": "Submissions" },
+  { "code": "guard", "name": "Guard" },
+  { "code": "guard_passing", "name": "Guard Passing" },
+  { "code": "sweeps_reversals", "name": "Sweeps and Reversals" },
+  { "code": "takedowns", "name": "Takedowns" },
+  { "code": "escapes", "name": "Escapes" },
+  { "code": "back_control", "name": "Back Control" },
+  { "code": "top_control", "name": "Top Control" },
+  { "code": "leg_locks", "name": "Leg Locks" },
+  { "code": "transitions_scrambles", "name": "Transitions and Scrambles" },
+  { "code": "defense", "name": "Defense" },
+  { "code": "other", "name": "Other" }
+]

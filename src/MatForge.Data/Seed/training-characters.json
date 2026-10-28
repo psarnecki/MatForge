@@ -1,0 +1,10 @@
+[
+  { "code": "technique", "name": "Technique", "allowsRounds": false },
+  { "code": "drilling", "name": "Drilling", "allowsRounds": false },
+  { "code": "situational_drills", "name": "Situational Drills", "allowsRounds": false },
+  { "code": "sparring", "name": "Sparring", "allowsRounds": true },
+  { "code": "mixed", "name": "Mixed", "allowsRounds": true },
+  { "code": "open_mat", "name": "Open Mat", "allowsRounds": true },
+  { "code": "seminar", "name": "Seminar", "allowsRounds": false },
+  { "code": "yoga_mobility", "name": "Yoga and Mobility", "allowsRounds": false }
+]

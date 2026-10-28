@@ -1,0 +1,73 @@
+[
+  { "code": "rear_naked_choke", "name": "Rear Naked Choke", "category": "choke" },
+  { "code": "triangle", "name": "Triangle Choke", "category": "choke" },
+  { "code": "guillotine", "name": "Guillotine", "category": "choke" },
+  { "code": "arm_triangle", "name": "Arm Triangle", "category": "choke" },
+  { "code": "darce", "name": "D'Arce Choke", "category": "choke" },
+  { "code": "anaconda", "name": "Anaconda Choke", "category": "choke" },
+  { "code": "ezekiel", "name": "Ezekiel Choke", "category": "choke" },
+  { "code": "cross_collar_choke", "name": "Cross Collar Choke", "category": "choke" },
+  { "code": "bow_and_arrow", "name": "Bow and Arrow Choke", "category": "choke" },
+  { "code": "loop_choke", "name": "Loop Choke", "category": "choke" },
+  { "code": "baseball_bat_choke", "name": "Baseball Bat Choke", "category": "choke" },
+  { "code": "clock_choke", "name": "Clock Choke", "category": "choke" },
+  { "code": "paper_cutter_choke", "name": "Paper Cutter Choke", "category": "choke" },
+  { "code": "north_south_choke", "name": "North-South Choke", "category": "choke" },
+  { "code": "von_flue_choke", "name": "Von Flue Choke", "category": "choke" },
+  { "code": "peruvian_necktie", "name": "Peruvian Necktie", "category": "choke" },
+  { "code": "japanese_necktie", "name": "Japanese Necktie", "category": "choke" },
+  { "code": "gogoplata", "name": "Gogoplata", "category": "choke" },
+
+  { "code": "armbar", "name": "Armbar", "category": "arm_lock" },
+  { "code": "wristlock", "name": "Wristlock", "category": "arm_lock" },
+
+  { "code": "kimura", "name": "Kimura", "category": "shoulder_lock" },
+  { "code": "americana", "name": "Americana", "category": "shoulder_lock" },
+  { "code": "omoplata", "name": "Omoplata", "category": "shoulder_lock" },
+  { "code": "baratoplata", "name": "Baratoplata", "category": "shoulder_lock" },
+
+  { "code": "straight_ankle_lock", "name": "Straight Ankle Lock", "category": "leg_lock" },
+  { "code": "inside_heel_hook", "name": "Inside Heel Hook", "category": "leg_lock" },
+  { "code": "outside_heel_hook", "name": "Outside Heel Hook", "category": "leg_lock" },
+  { "code": "toe_hold", "name": "Toe Hold", "category": "leg_lock" },
+  { "code": "kneebar", "name": "Kneebar", "category": "leg_lock" },
+  { "code": "estima_lock", "name": "Estima Lock", "category": "leg_lock" },
+  { "code": "banana_split", "name": "Banana Split", "category": "leg_lock" },
+
+  { "code": "neck_crank", "name": "Neck Crank", "category": "neck_crank" },
+  { "code": "twister", "name": "Twister", "category": "neck_crank" },
+  { "code": "can_opener", "name": "Can Opener", "category": "neck_crank" },
+
+  { "code": "bicep_slicer", "name": "Bicep Slicer", "category": "compression_lock" },
+  { "code": "calf_slicer", "name": "Calf Slicer", "category": "compression_lock" },
+
+  { "code": "single_leg", "name": "Single Leg", "category": "takedown" },
+  { "code": "double_leg", "name": "Double Leg", "category": "takedown" },
+  { "code": "high_crotch", "name": "High Crotch", "category": "takedown" },
+  { "code": "ankle_pick", "name": "Ankle Pick", "category": "takedown" },
+  { "code": "duck_under", "name": "Duck Under", "category": "takedown" },
+  { "code": "body_lock_takedown", "name": "Body Lock Takedown", "category": "takedown" },
+
+  { "code": "seoi_nage", "name": "Seoi Nage", "category": "throw" },
+  { "code": "uchi_mata", "name": "Uchi Mata", "category": "throw" },
+  { "code": "osoto_gari", "name": "O Soto Gari", "category": "throw" },
+  { "code": "ouchi_gari", "name": "O Uchi Gari", "category": "throw" },
+  { "code": "kouchi_gari", "name": "Ko Uchi Gari", "category": "throw" },
+  { "code": "harai_goshi", "name": "Harai Goshi", "category": "throw" },
+  { "code": "ogoshi", "name": "O Goshi / Hip Toss", "category": "throw" },
+  { "code": "tai_otoshi", "name": "Tai Otoshi", "category": "throw" },
+  { "code": "tomoe_nage", "name": "Tomoe Nage", "category": "throw" },
+  { "code": "de_ashi_harai", "name": "De Ashi Harai", "category": "throw" },
+  { "code": "kata_guruma", "name": "Kata Guruma / Fireman's Carry", "category": "throw" },
+  { "code": "suplex", "name": "Suplex", "category": "throw" },
+
+  { "code": "pin_fall", "name": "Pin / Fall", "category": "pin" },
+
+  { "code": "kesa_gatame", "name": "Kesa Gatame", "category": "hold_down" },
+  { "code": "kata_gatame", "name": "Kata Gatame", "category": "hold_down" },
+  { "code": "yoko_shiho_gatame", "name": "Yoko Shiho Gatame", "category": "hold_down" },
+  { "code": "kami_shiho_gatame", "name": "Kami Shiho Gatame", "category": "hold_down" },
+  { "code": "tate_shiho_gatame", "name": "Tate Shiho Gatame", "category": "hold_down" },
+
+  { "code": "other_finish", "name": "Other Finish", "category": "other" }
+]
