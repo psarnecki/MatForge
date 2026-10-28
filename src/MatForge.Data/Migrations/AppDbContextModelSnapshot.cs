@@ -566,6 +566,21 @@ namespace MatForge.Data.Migrations
                     b.ToTable("Positions");
                 });
 
+            modelBuilder.Entity("MatForge.Data.Entities.PositionDiscipline", b =>
+                {
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisciplineId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PositionId", "DisciplineId");
+
+                    b.HasIndex("DisciplineId");
+
+                    b.ToTable("PositionDisciplines");
+                });
+
             modelBuilder.Entity("MatForge.Data.Entities.SparringRound", b =>
                 {
                     b.Property<int>("Id")
@@ -1074,6 +1089,25 @@ namespace MatForge.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MatForge.Data.Entities.PositionDiscipline", b =>
+                {
+                    b.HasOne("MatForge.Data.Entities.Discipline", "Discipline")
+                        .WithMany()
+                        .HasForeignKey("DisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MatForge.Data.Entities.Position", "Position")
+                        .WithMany("Disciplines")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Discipline");
+
+                    b.Navigation("Position");
+                });
+
             modelBuilder.Entity("MatForge.Data.Entities.SparringRound", b =>
                 {
                     b.HasOne("MatForge.Data.Entities.Position", "Position")
@@ -1256,6 +1290,11 @@ namespace MatForge.Data.Migrations
             modelBuilder.Entity("MatForge.Data.Entities.Competition", b =>
                 {
                     b.Navigation("Fights");
+                });
+
+            modelBuilder.Entity("MatForge.Data.Entities.Position", b =>
+                {
+                    b.Navigation("Disciplines");
                 });
 
             modelBuilder.Entity("MatForge.Data.Entities.TechniqueCategory", b =>
