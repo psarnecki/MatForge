@@ -10,8 +10,8 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: `docker compose up --build` starts everything; `GET /health` returns 200.
 
 **T02 Data model, database, seeding** [01, 07] (MUST)
-- All entities (including the `TechniqueCategoryDiscipline` link table), enums, EF Core mapping (string enums, precision, indexes, check constraint, delete behavior), first migration.
-- Dictionary seeder from JSON files per `07-seed-data.md`; idempotent; it also syncs the category-discipline links.
+- All entities (including the `TechniqueCategoryDiscipline` and `PositionDiscipline` link tables), enums, EF Core mapping (string enums, precision, indexes, check constraint, delete behavior), first migration.
+- Dictionary seeder from JSON files per `07-seed-data.md`; idempotent; it also syncs the category-discipline and position-discipline links.
 - Extend `GET /health` (from T01) with a database check (`AppDbContext.Database.CanConnectAsync()`): it returns 200 only when the database is reachable.
 - Integration test setup (first use): the `MatForge.IntegrationTests` project with one SQL Server container per test run (Testcontainers) that applies the production migrations. No `WebApplicationFactory` yet.
 - Accept: fresh database gets all dictionaries; running the seeder twice changes nothing; an integration test proves idempotence and unique codes. If Testcontainers cannot be made to work in reasonable time, ask the author; the fallback is SQLite in memory.
@@ -33,7 +33,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: club in use cannot be deleted (409, message shown in UI); belt must match discipline (400); isolation tests for clubs.
 
 **T06 Sessions API** [01 §4.4-4.5, 02 §5] (MUST)
-- Service, DTOs, validators (I-01, I-03, I-05, I-10, kind rules), Mapperly mapper, controller, range query.
+- Service, DTOs, validators (I-01, I-03, I-05, I-10, I-11, kind rules), Mapperly mapper, controller, range query.
 - Accept: create/read/update/delete with rounds; every invariant has a failing-input unit test (validators); integration tests for the endpoints, including isolation; list returns summaries with round counts; rounds are rejected when the character does not allow them (I-09).
 
 **T07 Calendar and session form (without rounds)** [04 §4.3-4.4] (MUST)
@@ -44,7 +44,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T08 Rounds quick entry** [04 §4.4 step 4] (MUST)
 - Win/Loss/Draw buttons, round chips, bottom sheet for technique/position/notes, live summary. The section is visible only for characters with `allowsRounds`.
-- Accept: 8 rounds can be logged with one tap each; technique selector is a select grouped by category and limited to the categories offered in the session's discipline; Draw hides technique/position; saved data round-trips.
+- Accept: 8 rounds can be logged with one tap each; technique selector is a select grouped by category and limited to the categories offered in the session's discipline; the position selector lists only the positions offered in that discipline; Draw hides technique/position; saved data round-trips.
 
 **T09 Competitions API and UI** [01 §4.6-4.7, 02 §6, 04 §4.5] (MUST)
 - Service, validators (I-01, I-04, I-10), controller, list, form with fights, delete with 409 rule.

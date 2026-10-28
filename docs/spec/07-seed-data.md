@@ -56,7 +56,8 @@ A technique is a **finishing action**: the action that decided a sparring round 
 | Compression Lock (`compression_lock`) | yes | | | |
 | Takedown (`takedown`) | yes | yes | yes | yes |
 | Throw (`throw`) | yes | yes | yes | yes |
-| Pin / Hold-down (`pin`) | | yes | yes | yes |
+| Pin (`pin`) | | yes | | |
+| Hold-down (`hold_down`) | | | yes | yes |
 | Other (`other`) | yes | yes | yes | yes |
 
 The marks follow the usual rulesets (judo forbids leg locks, neck cranks and compression locks; sport sambo has no chokes, but combat sambo does, so sambo keeps them). They are an assumption: **verify them** and change the table if needed. Only link rows change, and the seeder syncs them.
@@ -70,23 +71,53 @@ Seed file shape for a category: `{ "code": "choke", "name": "Choke", "discipline
 | `choke` | Rear Naked Choke (`rear_naked_choke`), Triangle Choke (`triangle`), Guillotine (`guillotine`), Arm Triangle (`arm_triangle`), D'Arce Choke (`darce`), Anaconda Choke (`anaconda`), Ezekiel Choke (`ezekiel`), Cross Collar Choke (`cross_collar_choke`), Bow and Arrow Choke (`bow_and_arrow`), Loop Choke (`loop_choke`), Baseball Bat Choke (`baseball_bat_choke`), Clock Choke (`clock_choke`), Paper Cutter Choke (`paper_cutter_choke`), North-South Choke (`north_south_choke`), Von Flue Choke (`von_flue_choke`), Peruvian Necktie (`peruvian_necktie`), Japanese Necktie (`japanese_necktie`), Gogoplata (`gogoplata`) |
 | `arm_lock` | Armbar (`armbar`), Wristlock (`wristlock`) |
 | `shoulder_lock` | Kimura (`kimura`), Americana (`americana`), Omoplata (`omoplata`), Baratoplata (`baratoplata`) |
-| `leg_lock` | Straight Ankle Lock (`straight_ankle_lock`), Inside Heel Hook (`inside_heel_hook`), Outside Heel Hook (`outside_heel_hook`), Toe Hold (`toe_hold`), Kneebar (`kneebar`), Estima Lock (`estima_lock`) |
+| `leg_lock` | Straight Ankle Lock (`straight_ankle_lock`), Inside Heel Hook (`inside_heel_hook`), Outside Heel Hook (`outside_heel_hook`), Toe Hold (`toe_hold`), Kneebar (`kneebar`), Estima Lock (`estima_lock`), Banana Split (`banana_split`) |
 | `neck_crank` | Neck Crank (`neck_crank`), Twister (`twister`), Can Opener (`can_opener`) |
 | `compression_lock` | Bicep Slicer (`bicep_slicer`), Calf Slicer (`calf_slicer`) |
 | `takedown` | Single Leg (`single_leg`), Double Leg (`double_leg`), High Crotch (`high_crotch`), Ankle Pick (`ankle_pick`), Duck Under (`duck_under`), Body Lock Takedown (`body_lock_takedown`) |
 | `throw` | Seoi Nage (`seoi_nage`), Uchi Mata (`uchi_mata`), O Soto Gari (`osoto_gari`), O Uchi Gari (`ouchi_gari`), Ko Uchi Gari (`kouchi_gari`), Harai Goshi (`harai_goshi`), O Goshi / Hip Toss (`ogoshi`), Tai Otoshi (`tai_otoshi`), Tomoe Nage (`tomoe_nage`), De Ashi Harai (`de_ashi_harai`), Kata Guruma / Fireman's Carry (`kata_guruma`), Suplex (`suplex`) |
-| `pin` | Pin / Fall (`pin_fall`), Hold-down (`hold_down`) |
+| `pin` | Pin / Fall (`pin_fall`) |
+| `hold_down` | Kesa Gatame (`kesa_gatame`), Kata Gatame (`kata_gatame`), Yoko Shiho Gatame (`yoko_shiho_gatame`), Kami Shiho Gatame (`kami_shiho_gatame`), Tate Shiho Gatame (`tate_shiho_gatame`) |
 | `other` | Other Finish (`other_finish`) |
 
-56 entries: 35 submissions, 6 takedowns, 12 throws, 2 pins, and 1 "other". Variants of the same technique from different situations are **not** separate entries; the situation is captured by the position. A technique known under two names in different disciplines is **one** entry whose name shows both (judo name first, e.g. "Kata Guruma / Fireman's Carry"), so every athlete finds the name they know and the statistics are not split. Sweeps, guard passes, and point-scoring details are not finishing actions and are not in the dictionary (D-20).
+61 entries: 36 submissions, 6 takedowns, 12 throws, 1 pin, 5 hold-downs, and 1 "other". A wrestling fall is a pin; judo and sambo hold-downs (osaekomi-waza) are separate techniques. The fight method `Pin` covers both. Variants of the same technique from different situations are **not** separate entries; the situation is captured by the position. A technique known under two names in different disciplines is **one** entry whose name shows both (judo name first, e.g. "Kata Guruma / Fireman's Carry"), so every athlete finds the name they know and the statistics are not split. Sweeps, guard passes, and point-scoring details are not finishing actions and are not in the dictionary (D-20).
 
 How to use them: a Win or Loss round (or a fight with the method Submission, Throw, or Pin) can name the action that decided it. A wrestler who won a round with a double leg picks Takedown, Double Leg; a judoka picks Throw, Uchi Mata; a BJJ athlete picks Choke, Rear Naked Choke. Recording the technique is always optional.
 
 ## Positions (named from the finisher's perspective, D-07)
 
-Standing (`standing`), Clinch (`clinch`), Front Headlock (`front_headlock`), Scramble (`scramble`), Turtle (`turtle`), Closed Guard (`closed_guard`), Half Guard (`half_guard`), Open Guard (`open_guard`), Butterfly Guard (`butterfly_guard`), Side Control (`side_control`), Knee on Belly (`knee_on_belly`), North-South (`north_south`), Mount (`mount`), Back Control (`back_control`), Leg Entanglement (`leg_entanglement`), Other (`other_position`).
+Each position is offered only in the disciplines marked below (D-33). Aliases go into the name: one row and one code per position.
 
-16 entries. A throw or takedown from the feet is usually `standing` or `clinch`; a pin from `side_control`, `mount`, `north_south`, or `turtle` (top). Positions are offered to every discipline; filtering them by discipline is an optional extra (`08-optional.md`).
+| Position (`code`) | `bjj` | `wrestling` | `judo` | `sambo` |
+|---|---|---|---|---|
+| Standing (`standing`) | yes | yes | yes | yes |
+| Clinch (`clinch`) | yes | yes | yes | yes |
+| Front Headlock (`front_headlock`) | yes | yes | yes | yes |
+| Scramble (`scramble`) | yes | yes | yes | yes |
+| Turtle (`turtle`) | yes | yes | yes | yes |
+| Closed Guard (`closed_guard`) | yes | | yes | yes |
+| Half Guard (`half_guard`) | yes | | yes | yes |
+| Open Guard (`open_guard`) | yes | | yes | yes |
+| Butterfly Guard (`butterfly_guard`) | yes | | | yes |
+| Side Control (`side_control`) | yes | yes | yes | yes |
+| Kesa Gatame / Scarf Hold (`kesa_gatame`) | yes | | yes | yes |
+| Knee on Belly (`knee_on_belly`) | yes | | | yes |
+| North-South (`north_south`) | yes | yes | yes | yes |
+| Mount (`mount`) | yes | | yes | yes |
+| Back Control (`back_control`) | yes | yes | yes | yes |
+| Leg Ride / Double Grapevine (`leg_ride`) | | yes | | |
+| Outside Ashi Garami (`outside_ashi`) | yes | | | yes |
+| Inside Ashi Garami (`inside_ashi`) | yes | | | yes |
+| Saddle / Cross Ashi (`saddle`) | yes | | | yes |
+| 50/50 (`fifty_fifty`) | yes | | | yes |
+| Backside 50/50 (`backside_fifty_fifty`) | yes | | | yes |
+| Single Leg X (`single_leg_x`) | yes | | | yes |
+| Truck (`truck`) | yes | | | |
+| Other (`other_position`) | yes | yes | yes | yes |
+
+24 entries. A throw or takedown from the feet is usually `standing` or `clinch`; a pin or hold-down from `side_control`, `kesa_gatame`, `mount`, `north_south`, or `turtle` (top). The marks are an assumption: **verify them** and change the table if needed. Only link rows change, and the seeder syncs them.
+
+Seed file shape for a position: `{ "code": "saddle", "name": "Saddle / Cross Ashi", "disciplines": ["bjj", "sambo"] }`.
 
 ## Material categories
 
@@ -96,12 +127,12 @@ Submissions (`submissions`), Guard (`guard`), Guard Passing (`guard_passing`), S
 
 - **Add an entry** (technique, position, category, ...): add a row with a **new unique `Code`**. Nothing else is needed.
 - **Add a new category:** add the category row with its list of disciplines, then add techniques to it or move existing ones into it.
-- **Offer a category in another discipline (or stop offering it):** edit the `disciplines` list of the category. Only the link rows change. Rounds and fights already saved keep their technique; the rule only applies when a record is saved.
+- **Offer a category or a position in another discipline (or stop offering it):** edit its `disciplines` list. Only the link rows change. Rounds and fights already saved keep their technique and position; the rule only applies when a record is saved.
 - **Move a technique to another category, or split a category into smaller ones:** change the technique's category in the seed. Past rounds point to the technique, so statistics regroup automatically.
 - **Rename:** change `Name`; the code stays.
 - **Never change or delete an existing `Code`.** The seeder finds rows by `Code`; a changed code would create a new row and leave old data on the old one. To retire an entry, keep it and stop using it.
 - **Split one technique into two:** add the new ones. Old rounds stay on the old technique (re-mapping them would be a one-off manual data fix).
-- The seeder updates every field of an existing row except `Code` (name, sort order, category, flags, degree limits). It also makes the category-discipline link rows match the seed exactly (adds missing links, removes extra ones); links are the only rows it ever deletes.
+- The seeder updates every field of an existing row except `Code` (name, sort order, category, flags, degree limits). It also makes the category-discipline and position-discipline link rows match the seed exactly (adds missing links, removes extra ones); links are the only rows it ever deletes.
 
 ## Other enumerations (in code, not seeded)
 

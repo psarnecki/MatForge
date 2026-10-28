@@ -174,7 +174,7 @@ Period 2026-09-01..2026-09-30, filters none, training thresholds. 20 rounds:
 | Win | Triangle (choke) | closed_guard | 2 |
 | Win | Kimura (shoulder_lock) | none | 2 |
 | Win | none | none | 4 |
-| Loss | Inside Heel Hook (leg_lock) | leg_entanglement | 2 |
+| Loss | Inside Heel Hook (leg_lock) | saddle | 2 |
 | Loss | Guillotine (choke) | none | 1 |
 | Loss | Rear Naked Choke (choke) | back_control | 1 |
 | Loss | none | none | 2 |
@@ -184,7 +184,7 @@ Expected:
 
 - `totals`: rounds 20, wins 12, losses 6, draws 2, `winRate` 0.6, `balance` 6.
 - `finishesFor.total` 8. `byTechnique`: RNC 4 (0.5), Triangle 2 (0.25), Kimura 2 (0.25). `byCategory`: choke 6 (0.75), shoulder_lock 2 (0.25). `byPosition`: recorded 5; back_control 3 (0.6), closed_guard 2 (0.4).
-- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: leg_lock 2 (0.5), choke 2 (0.5). `byPosition`: recorded 3; leg_entanglement 2 (0.6667), back_control 1 (0.3333).
+- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: leg_lock 2 (0.5), choke 2 (0.5). `byPosition`: recorded 3; saddle 2 (0.6667), back_control 1 (0.3333).
 - Insights (training): `DominantFinisherTechnique` = RNC only (Triangle 0.25 < 0.30); `DominantFinisherCategory` = choke (0.75); `StrongPosition` = back_control (closed_guard has share 0.4 but count 2 < 3); **no** `RecurringLoss*` (finishesAgainst.total 4 < 5); **no** `VulnerablePosition` (recorded 3 < 5).
 
 ### GT-02: Insufficient data

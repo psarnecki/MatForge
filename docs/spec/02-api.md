@@ -56,12 +56,12 @@ Cookie settings: HttpOnly, `SameSite=Lax`, `Secure` when the request is HTTPS. A
   "activityTypes": [],
   "techniqueCategories": [{ "id": 1, "code": "choke", "name": "Choke", "disciplineIds": [1, 3, 4] }],
   "techniques": [{ "id": 1, "code": "rear_naked_choke", "name": "Rear Naked Choke", "categoryId": 1 }],
-  "positions": [],
+  "positions": [{ "id": 19, "code": "saddle", "name": "Saddle / Cross Ashi", "disciplineIds": [1, 4] }],
   "materialCategories": []
 }
 ```
 
-`disciplineIds` of a category lists the disciplines in which it is offered. The client shows a technique only when its category is offered in the selected discipline; the server enforces the same rule on save (I-10) and answers `400` with the error on the technique field. Sorted by `SortOrder`, then `Name`. The client loads this once at startup and caches it. Response header `Cache-Control: private, max-age=3600`.
+`disciplineIds` of a category lists the disciplines in which it is offered. The client shows a technique only when its category is offered in the selected discipline; the server enforces the same rule on save (I-10) and answers `400` with the error on the technique field. `disciplineIds` of a position works the same way for the position field (I-11). Sorted by `SortOrder`, then `Name`. The client loads this once at startup and caches it. Response header `Cache-Control: private, max-age=3600`.
 
 ## 4. Clubs and belts
 

@@ -90,7 +90,7 @@ Maps every point of the thesis concept to the place in this specification where 
 
 | Concept | Specification |
 |---|---|
-| Consistent data model for a complex domain | 01 (ERD, constraints, invariants I-01 to I-10) |
+| Consistent data model for a complex domain | 01 (ERD, constraints, invariants I-01 to I-11) |
 | Multi-layer web system with authentication and authorization | 05 §2; 02 §2, §11; 01 §1 (isolation) |
 | Diary, sparring and fight registers | 01 §4.4-4.7; T06-T09 |
 | Rule-based analysis module | 03; T11-T13 |
@@ -111,6 +111,7 @@ Machine learning, event diary, PDF reports, technical tags on sessions. None is 
 | `AllowsRounds` rule per character | 01 §3; D-23 | Drills are not sparring |
 | Fixed fight methods and medal shortcuts | 01 §4.6-4.7 | Simplest consistent model |
 | Finishing actions beyond submissions (takedowns, throws, pins) and technique categories linked to disciplines | 01 §3, I-10; 07; D-20, D-29 | Wrestling and judo rounds rarely end by a submission; each athlete sees only relevant techniques |
+| Positions linked to disciplines, specific leg entanglement positions, judo and sambo hold-downs as techniques | 01 §3, I-11; 07; D-33 | Each athlete sees only relevant positions; precise statistics without a vague catch-all entry |
 | Account deletion | 02 §2 | Privacy; small profile option |
 | Demo data seeder | 05 §2; T10 | Defense demo and analytics checks |
 | `/health` endpoint | 02 §1 | Quick check that the app (and from T02 the database) is up |
