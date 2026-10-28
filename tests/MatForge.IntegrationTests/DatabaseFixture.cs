@@ -5,7 +5,7 @@ using Testcontainers.MsSql;
 
 namespace MatForge.IntegrationTests;
 
-// One SQL Server container for the whole test run, with the production migrations applied
+// Starts one SQL Server container for the whole test run and applies the production migrations
 public class DatabaseFixture : IAsyncLifetime
 {
     private readonly MsSqlContainer _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();

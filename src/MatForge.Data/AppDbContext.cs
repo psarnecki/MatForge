@@ -68,7 +68,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasForeignKey(g => g.CompetitionId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // TrainingSession: grappling and other sessions have different required fields
+        // Grappling sessions and other sessions require different fields
         modelBuilder.Entity<TrainingSession>()
             .ToTable(t => t.HasCheckConstraint("CK_TrainingSessions_Kind",
                 "([Kind] = 'Grappling' AND [DisciplineId] IS NOT NULL AND [FormatId] IS NOT NULL AND [CharacterId] IS NOT NULL AND [ActivityTypeId] IS NULL)" +
