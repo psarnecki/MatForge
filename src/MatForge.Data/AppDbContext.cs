@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<TechniqueCategoryDiscipline> TechniqueCategoryDisciplines => Set<TechniqueCategoryDiscipline>();
     public DbSet<Technique> Techniques => Set<Technique>();
     public DbSet<Position> Positions => Set<Position>();
+    public DbSet<PositionDiscipline> PositionDisciplines => Set<PositionDiscipline>();
     public DbSet<Belt> Belts => Set<Belt>();
     public DbSet<MaterialCategory> MaterialCategories => Set<MaterialCategory>();
 
