@@ -1,0 +1,13 @@
+[
+  { "code": "choke", "name": "Choke", "disciplines": ["bjj", "judo", "sambo"] },
+  { "code": "arm_lock", "name": "Arm Lock", "disciplines": ["bjj", "judo", "sambo"] },
+  { "code": "shoulder_lock", "name": "Shoulder Lock", "disciplines": ["bjj", "judo", "sambo"] },
+  { "code": "leg_lock", "name": "Leg Lock", "disciplines": ["bjj", "sambo"] },
+  { "code": "neck_crank", "name": "Neck and Spine Crank", "disciplines": ["bjj"] },
+  { "code": "compression_lock", "name": "Compression Lock", "disciplines": ["bjj"] },
+  { "code": "takedown", "name": "Takedown", "disciplines": ["bjj", "wrestling", "judo", "sambo"] },
+  { "code": "throw", "name": "Throw", "disciplines": ["bjj", "wrestling", "judo", "sambo"] },
+  { "code": "pin", "name": "Pin", "disciplines": ["wrestling"] },
+  { "code": "hold_down", "name": "Hold-down", "disciplines": ["judo", "sambo"] },
+  { "code": "other", "name": "Other", "disciplines": ["bjj", "wrestling", "judo", "sambo"] }
+]

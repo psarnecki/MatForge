@@ -20,14 +20,15 @@ CQRS, MediatR, generic repository / unit-of-work, AutoMapper, generic base contr
 ## 2. Backend
 
 - **.NET 10**, C#, `Nullable` enabled, `TreatWarningsAsErrors` true, file-scoped namespaces, `.editorconfig` committed.
-- Dependency direction: `Api → Application → Data` (the three layers from the concept: API, business logic, data access). Entities, enums, `AppDbContext`, EF configurations, migrations, and seeding live in `Data`.
+- Dependency direction: `Api → Application → Data` (the three layers from the concept: API, business logic, data access). Entities, enums, `AppDbContext`, migrations, and seeding live in `Data`.
+- **EF Core mapping:** as much as possible with attributes on the entities (`[MaxLength]`, `[Precision]`, `[Index]`, `[PrimaryKey]`); the rest (relationships with delete behavior, the check constraint, enums stored as strings) in `AppDbContext.OnModelCreating` / `ConfigureConventions`, one commented block per rule. No separate configuration classes.
 - Packages: EF Core (SQL Server provider), ASP.NET Core Identity, FluentValidation, **Mapperly** (entity → DTO and create request → entity; on update the service copies the scalar fields and rebuilds child lists by hand; analytics results are built by calculators, not mapped), Serilog is **not** used (built-in `ILogger`), `Microsoft.AspNetCore.OpenApi` for the OpenAPI document and `Swashbuckle.AspNetCore.SwaggerUI` for the UI.
 - Structure by feature inside `Application`: `Features/Sessions/{ISessionService.cs, SessionService.cs, SessionDtos.cs, SessionValidators.cs, SessionMapper.cs}`; same for Competitions, Goals, Materials, Measurements, Profile, Analytics (`Calculators/`, `Rules/`).
 - Naming: `XxxService` with its interface `IXxxService` in the same folder, `XxxDto`, `CreateXxxRequest` / `UpdateXxxRequest`, `XxxValidator`, `XxxMapper`, controllers `XxxController`. Async methods end with `Async` and accept a `CancellationToken`. Tables plural; enums stored as strings.
 - **Current user:** the `ICurrentUser` interface lives in `Data` (the dependency direction `Api → Application → Data` allows `Data` to define it). Its implementation, `CurrentUser`, lives in `Api/Infrastructure`, reads `UserId` from the cookie claims (`HttpContext`), and is registered as scoped. `AppDbContext` takes `ICurrentUser` in its constructor and applies the global query filters (`01-domain-model.md` §1) with `currentUser.UserId`. Seeders and tests that need all rows use `IgnoreQueryFilters()`. `UserId` is `Guid?`: `CurrentUser` returns `null` and never throws when there is no `HttpContext` or no user claim (startup seeder, `dotnet ef`, login and registration before a user exists); the filters then return no rows.
 - **Time:** services take today's date with `DateOnly.FromDateTime(DateTime.Now)` and pass it to the calculators as a parameter; calculators never read the clock. The container time zone is `Europe/Warsaw` (`TZ` in `docker-compose.yml`). The app image is the standard (not chiseled) `aspnet` image; if `TZ` has no effect, install `tzdata` in the Dockerfile.
-- **Configuration:** `appsettings.json` for defaults, environment variables (via `.env` in Docker) for secrets. Analytics thresholds in `Analytics:Rules` (typed options).
-- **Seeding:** on startup, apply migrations, then run the idempotent dictionary seeder (upsert by `Code`, or by `(DisciplineId, Code)` for belts and formats, see `01-domain-model.md` §3; never delete; JSON files embedded in `Data`). The demo-data seeder runs only when `Seed:DemoData=true`. It creates user `demo@matforge.com` (password `Demo1234!`) with about 6 months of realistic history ending on the day the app starts, laid out the same way every time (`new Random(42)`), and does nothing if that user already exists.
+- **Configuration:** `appsettings.json` for defaults, environment variables (via `.env` in Docker) for secrets; when the API runs from the IDE, the connection string comes from `dotnet user-secrets` (D-30). Analytics thresholds in `Analytics:Rules` (typed options).
+- **Seeding:** on startup, apply migrations, then run the idempotent dictionary seeder (upsert by `Code`, or by `(DisciplineId, Code)` for belts and formats, see `01-domain-model.md` §3; never delete dictionary rows, except the category-discipline and position-discipline link rows; JSON files embedded in `Data`). The demo-data seeder runs only when `Seed:DemoData=true`. It creates user `demo@matforge.com` (password `Demo1234!`) with about 6 months of realistic history ending on the day the app starts, laid out the same way every time (`new Random(42)`), and does nothing if that user already exists.
 - No comments that restate code. Comment only the "why". No commented-out code. No TODOs without a task reference.
 
 ## 3. Frontend
@@ -61,6 +62,16 @@ Rules: a bug fix starts with a failing test. Tests name behavior (`Returns_404_w
 `docker-compose.yml` services: `db` (SQL Server 2022, volume, healthcheck) and `app` (multi-stage Dockerfile: one stage builds the frontend with Node, the next builds the API and copies the frontend into `wwwroot`; the app waits for the db, migrates and seeds on start, and serves `/api` plus the static frontend with a fallback to `index.html`). One command: `docker compose up --build`. App at `http://localhost:8080`. Variables in `.env` (template `.env.example`: `MSSQL_SA_PASSWORD`, `Seed__DemoData`, `TZ`).
 
 **Daily development (fast loop):** start only the database with `docker compose up db`, run the API from the IDE (debugger, hot reload) and the frontend with `npm run dev` (Vite proxy of `/api` to the API port). The full `docker compose up --build` is for end-to-end checks and the defense demo.
+
+**Migrations (author only, D-31).** Run from the repository root after changing the model:
+
+```
+dotnet ef migrations add <Name> --project src/MatForge.Data --startup-project src/MatForge.Api
+dotnet ef database update --project src/MatForge.Data --startup-project src/MatForge.Api
+dotnet ef migrations remove --project src/MatForge.Data --startup-project src/MatForge.Api
+```
+
+`add` creates the migration in `src/MatForge.Data/Migrations/`; `database update` applies it to the database from the user secrets; `remove` deletes the last migration if it has not been applied. Nobody else needs these commands: the app applies pending migrations at startup.
 
 ## 7. Definition of Done (every task)
 

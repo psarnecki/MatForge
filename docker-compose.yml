@@ -19,6 +19,7 @@ services:
     build: .
     environment:
       TZ: ${TZ}
+      ConnectionStrings__Default: "Server=db;Database=MatForge;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
     ports:
       - "8080:8080"
     depends_on:

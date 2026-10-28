@@ -1,0 +1,8 @@
+[
+  { "code": "strength", "name": "Strength" },
+  { "code": "conditioning", "name": "Conditioning" },
+  { "code": "running", "name": "Running" },
+  { "code": "cycling", "name": "Cycling" },
+  { "code": "swimming", "name": "Swimming" },
+  { "code": "other", "name": "Other" }
+]

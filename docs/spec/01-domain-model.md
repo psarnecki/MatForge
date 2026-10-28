@@ -34,6 +34,10 @@ erDiagram
     ActivityType o|--o{ TrainingSession : "is activity"
 
     TechniqueCategory ||--o{ Technique : groups
+    TechniqueCategory ||--o{ TechniqueCategoryDiscipline : "offered in"
+    Discipline ||--o{ TechniqueCategoryDiscipline : "offers"
+    Position ||--o{ PositionDiscipline : "offered in"
+    Discipline ||--o{ PositionDiscipline : "offers"
     Technique o|--o{ SparringRound : "finished with"
     Position o|--o{ SparringRound : "finished from"
 
@@ -56,11 +60,17 @@ All dictionary tables share: `Id`, `Code` (string 50, lower_snake_case, **stable
 | `DisciplineFormat` | `DisciplineId` (req) |
 | `TrainingCharacter` | `AllowsRounds` (bool, req): sparring rounds may be recorded in sessions of this character |
 | `ActivityType` | none (for non-grappling sessions) |
-| `TechniqueCategory` | none |
+| `TechniqueCategory` | none (the disciplines it is offered in: see the link table below) |
 | `Technique` | `CategoryId` (req) |
-| `Position` | none |
+| `Position` | none (the disciplines it is offered in: see the link tables below) |
 | `Belt` | `DisciplineId` (req), `Rank` (int, higher = more advanced), `MinDegree` and `MaxDegree` (int, req): allowed stripes / degrees for this belt |
 | `MaterialCategory` | none |
+
+**Link table `TechniqueCategoryDiscipline`** (not a dictionary, so no `Code`): composite primary key (`TechniqueCategoryId`, `DisciplineId`). A row means "this technique category is offered in this discipline" (D-29, I-10).
+
+**Link table `PositionDiscipline`** (same shape): composite primary key (`PositionId`, `DisciplineId`). A row means "this position is offered in this discipline" (D-33, I-11).
+
+The seeder makes the rows of both link tables match the seed exactly (adds missing, removes extra); they are the only rows it deletes.
 
 Contents: `07-seed-data.md`. Unique indexes: `(Code)` on every dictionary **except** `DisciplineFormat` and `Belt`, which are unique on `(DisciplineId, Code)` (codes such as `white` or `black` repeat across disciplines). The seeder upserts by `Code`, or by `(DisciplineId, Code)` for those two tables.
 
@@ -118,8 +128,8 @@ Child of `TrainingSession` (ordinary entity, cascade delete).
 |---|---|---|---|
 | Order | int | yes | 1..n, assigned from list order |
 | Result | enum `Win`, `Loss`, `Draw` | yes | `Draw` also covers "no result" |
-| TechniqueId | int | no | only if `Result` is `Win` or `Loss` (the finish) |
-| PositionId | int | no | only if `TechniqueId` is set. See D-07 for perspective |
+| TechniqueId | int | no | only if `Result` is `Win` or `Loss`: the action that decided the round (submission, takedown, throw, or pin). Its category must be offered in the session's discipline (I-10) |
+| PositionId | int | no | only if `TechniqueId` is set. See D-07 for perspective. Must be offered in the session's discipline (I-11) |
 | Notes | string(500) | no | |
 
 ### 4.6 Competition
@@ -149,8 +159,8 @@ Child of `Competition` (ordinary entity, cascade delete).
 | Order | int | yes | 1..n |
 | OpponentName | string(100) | no | |
 | Result | enum `Win`, `Loss`, `Draw` | yes | `Draw` is rare (submission-only formats, friendly matches) |
-| Method | enum `Submission`, `Points`, `Decision`, `Disqualification`, `Walkover` | unless `Draw` | required for `Win` / `Loss`; must be empty for `Draw` |
-| TechniqueId | int | no | only if `Method = Submission` |
+| Method | enum `Submission`, `Throw`, `Pin`, `Points`, `Decision`, `Disqualification`, `Walkover` | unless `Draw` | required for `Win` / `Loss`; must be empty for `Draw`. A win on points or by technical superiority (wrestling) is `Points`, with no technique |
+| TechniqueId | int | no | only if `Method` is `Submission`, `Throw`, or `Pin`. Its category must be offered in the competition's discipline (I-10) |
 | DurationSeconds | int | no | 1..3600 |
 | Notes | string(500) | no | |
 
@@ -176,7 +186,7 @@ Progress, current value, and state are **computed on read**, never stored (`03-a
 |---|---|---|---|
 | Title | string(200) | yes | |
 | Url | string(500) | yes | absolute http(s) URL |
-| Source | enum `YouTube`, `Instagram`, `TikTok`, `Other` | yes | **detected on the server from the URL host**; not sent by the client |
+| Source | enum `YouTube`, `Instagram`, `TikTok`, `Facebook`, `Other` | yes | **detected on the server from the URL host**; not sent by the client |
 | CategoryId | int | no | `MaterialCategory` |
 | Status | enum `Saved`, `Watched`, `Practiced`, `Mastered` | yes | default `Saved` |
 | Notes | string(2000) | no | |
@@ -206,9 +216,11 @@ At least one of the three values must be present.
 | I-01 | `FormatId` belongs to `DisciplineId` (sessions, competitions). |
 | I-02 | `UserBelt.BeltId` belongs to `UserBelt.DisciplineId`, and `Degree` is within that belt's `MinDegree..MaxDegree`. |
 | I-03 | Round: `Draw` has no technique and no position; position requires a technique. |
-| I-04 | Fight: technique only when `Method = Submission`. A `Draw` has no method and no technique. |
+| I-04 | Fight: technique only when `Method` is `Submission`, `Throw`, or `Pin`. A `Draw` has no method and no technique. |
 | I-05 | Every referenced `ClubId` / `CompetitionId` belongs to the current user. |
 | I-06 | Goal fields required per `Type` (table in 4.8); `EndDate ≥ StartDate` where both exist; for `CompetitionPrep`, `StartDate` is not later than the competition's date. |
 | I-07 | Body measurement has at least one value. |
 | I-08 | No endpoint ever returns or accepts another user's data. |
 | I-09 | A session may have rounds only if its character has `AllowsRounds = true`. |
+| I-10 | A round's or fight's technique belongs to a category offered in the discipline of its session or competition (`TechniqueCategoryDiscipline`). Checked when the record is saved, so later seed changes never break stored data. |
+| I-11 | A round's position is offered in the discipline of its session (`PositionDiscipline`). Checked when the record is saved, like I-10. |

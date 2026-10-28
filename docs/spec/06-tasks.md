@@ -10,8 +10,9 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: `docker compose up --build` starts everything; `GET /health` returns 200.
 
 **T02 Data model, database, seeding** [01, 07] (MUST)
-- All entities, enums, EF configurations (string enums, precision, indexes, check constraint, delete behavior), first migration.
-- Dictionary seeder from JSON files per `07-seed-data.md`; idempotent.
+- All entities (including the `TechniqueCategoryDiscipline` and `PositionDiscipline` link tables), enums, EF Core mapping (string enums, precision, indexes, check constraint, delete behavior), first migration.
+- Dictionary seeder from JSON files per `07-seed-data.md`; idempotent; it also syncs the category-discipline and position-discipline links.
+- Extend `GET /health` (from T01) with a database check (`AppDbContext.Database.CanConnectAsync()`): it returns 200 only when the database is reachable.
 - Integration test setup (first use): the `MatForge.IntegrationTests` project with one SQL Server container per test run (Testcontainers) that applies the production migrations. No `WebApplicationFactory` yet.
 - Accept: fresh database gets all dictionaries; running the seeder twice changes nothing; an integration test proves idempotence and unique codes. If Testcontainers cannot be made to work in reasonable time, ask the author; the fallback is SQLite in memory.
 
@@ -32,7 +33,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: club in use cannot be deleted (409, message shown in UI); belt must match discipline (400); isolation tests for clubs.
 
 **T06 Sessions API** [01 §4.4-4.5, 02 §5] (MUST)
-- Service, DTOs, validators (I-01, I-03, I-05, kind rules), Mapperly mapper, controller, range query.
+- Service, DTOs, validators (I-01, I-03, I-05, I-10, I-11, kind rules), Mapperly mapper, controller, range query.
 - Accept: create/read/update/delete with rounds; every invariant has a failing-input unit test (validators); integration tests for the endpoints, including isolation; list returns summaries with round counts; rounds are rejected when the character does not allow them (I-09).
 
 **T07 Calendar and session form (without rounds)** [04 §4.3-4.4] (MUST)
@@ -43,11 +44,11 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T08 Rounds quick entry** [04 §4.4 step 4] (MUST)
 - Win/Loss/Draw buttons, round chips, bottom sheet for technique/position/notes, live summary. The section is visible only for characters with `allowsRounds`.
-- Accept: 8 rounds can be logged with one tap each; technique selector is a select grouped by category; Draw hides technique/position; saved data round-trips.
+- Accept: 8 rounds can be logged with one tap each; technique selector is a select grouped by category and limited to the categories offered in the session's discipline; the position selector lists only the positions offered in that discipline; Draw hides technique/position; saved data round-trips.
 
 **T09 Competitions API and UI** [01 §4.6-4.7, 02 §6, 04 §4.5] (MUST)
-- Service, validators (I-01, I-04), controller, list, form with fights, delete with 409 rule.
-- Accept: CRUD with fights; technique only for Submission; integration tests including isolation; usable at 390 px.
+- Service, validators (I-01, I-04, I-10), controller, list, form with fights, delete with 409 rule.
+- Accept: CRUD with fights; technique only for Submission, Throw, or Pin, and only from categories offered in the competition's discipline; integration tests including isolation; usable at 390 px.
 
 **T10 Demo data seeder** [05 §2] (SHOULD)
 - Deterministic generator: user `demo@matforge.com` with the password `Demo1234!` (it meets the default Identity password rules); a history of about 6 months that **ends on the day the app starts**, so the dashboard's default 90 days always has data; 3-5 sessions per week; sparring rounds with a realistic distribution (a favorite finish, one recurring weakness, a gradual win-rate improvement); 3 competitions; 2 goals. The layout of sessions and results is the same every time, relative to the end date (`new Random(42)`). The seeder does nothing if the demo user already exists.
@@ -84,7 +85,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 ## Phase 6: Remaining modules and polish
 
 **T17 Materials library** [01 §4.9, 02 §8, 04 §4.7] (MUST)
-- Source detection with unit tests (including subdomains such as `www.`, `m.`, `vm.tiktok.com`), CRUD, status quick change, filters.
+- Source detection with unit tests (including subdomains such as `www.`, `m.`, `vm.tiktok.com`, `fb.watch`), CRUD, status quick change, filters.
 
 **T18 Body measurements** [01 §4.10, 02 §9, 04 §4.8] (MUST)
 - CRUD with unique date rule, chart.
@@ -101,7 +102,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T21 Material for the thesis** (SHOULD)
 - ERD and an architecture diagram exported as images (from the Mermaid ERD in `01-domain-model.md` and the layers in `05-conventions.md`), and the list of endpoints from Swagger UI, for use in the thesis text.
-- A short root `README.md` (a few lines): what the project is, `docker compose up --build`, the demo login, how to run the tests. A fuller README with screenshots is optional (`08-optional.md`).
+- A short root `README.md` (a few lines): what the project is, `docker compose up --build`, the demo login, how to run the tests, and how to set the development connection string with `dotnet user-secrets` for running the API from the IDE (D-30). A fuller README with screenshots is optional (`08-optional.md`).
 
 **T22 Buffer and release** (MUST)
 - Bug fixes only. Fresh clone → `docker compose up --build` → demo works. Before the defense, build the images while online (`docker compose build`), then check the demo with the network disconnected. Tag `v1.0`.

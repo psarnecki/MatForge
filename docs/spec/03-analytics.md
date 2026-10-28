@@ -22,7 +22,7 @@ Insight rules are separate classes implementing `IInsightRule` (one rule = one c
 | Week | ISO week, starting Monday. |
 | `winRate` | `wins / rounds` (draws stay in the denominator, D-09). `null` when `rounds = 0`. |
 | `balance` | `wins - losses`. |
-| "Other" entries | `other_submission` (technique), `other` (category), and `other_position` (position) are **counted** in distributions but **ignored by insight rules**. |
+| "Other" entries | `other_finish` (technique), `other` (category), and `other_position` (position) are **counted** in distributions but **ignored by insight rules**. |
 
 Grappling-only metrics use sessions with `Kind = Grappling`. Rounds of sessions outside the period are never counted. Rounds can only exist in sessions whose character allows rounds (D-23, I-09), so every stored round counts.
 
@@ -78,7 +78,7 @@ Optional filters `disciplineId`, `formatId` restrict to matching grappling sessi
 
 | Metric | Definition |
 |---|---|
-| `finishesFor.total` | Rounds with `Result = Win` **and** a technique. |
+| `finishesFor.total` | Rounds with `Result = Win` **and** a technique (any finishing action: submission, takedown, throw, or pin). Without a discipline filter, an athlete who trains several disciplines sees them mixed. |
 | `finishesAgainst.total` | Rounds with `Result = Loss` **and** a technique. |
 | `byTechnique`, `byCategory` | `share = count / total` of the same block. |
 | `byPosition.recorded` | Finishes in that block that **have a position**. `share = count / recorded`. Finishes without a position are excluded from this distribution. |
@@ -109,7 +109,7 @@ Optional filters `disciplineId`, `formatId` restrict to matching grappling sessi
 - A competition belongs to the period by its `Date`. The optional `disciplineId` / `formatId` filters apply to the competition's own discipline and format.
 - `winRate = wins / fights` (draws stay in the denominator, as in sparring).
 - `methods.wins/losses`: distribution of `Method` among won/lost fights; `share = count / wins` (or `/ losses`).
-- `finishesFor.total` = won fights with `Method = Submission` **and** a technique; `finishesAgainst.total` analogously for lost fights. Technique and category shares use these totals.
+- `finishesFor.total` = won fights with a technique (`Method` is `Submission`, `Throw`, or `Pin`); `finishesAgainst.total` analogously for lost fights. Technique and category shares use these totals.
 - Medal counts are derived from `Place` (1 = gold, 2 = silver, 3 = bronze); other places and `null` count as no medal.
 - `winRateDelta` rule as in section 4, with `MinSamples` of the competition profile.
 
@@ -149,8 +149,8 @@ Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound t
 |---|---|---|---|---|
 | `DominantFinisherTechnique` | Strength | In `finishesFor`: `total ≥ MinFinishes`, technique `count ≥ MinCount` and `share ≥ TechniqueShare` | `id, name, count, share` | top 3 |
 | `DominantFinisherCategory` | Strength | Same, on categories | same | top 1 |
-| `RecurringSubmissionTechnique` | Weakness | Same, on `finishesAgainst` techniques | same | top 3 |
-| `RecurringSubmissionCategory` | Weakness | Same, on `finishesAgainst` categories | same | top 1 |
+| `RecurringLossTechnique` | Weakness | Same, on `finishesAgainst` techniques | same | top 3 |
+| `RecurringLossCategory` | Weakness | Same, on `finishesAgainst` categories | same | top 1 |
 | `StrongPosition` | Strength | `finishesFor.byPosition.recorded ≥ MinFinishes`, position `count ≥ MinCount` and `share ≥ PositionShare` (training only) | `id, name, count, share` | top 1 |
 | `VulnerablePosition` | Weakness | Same, on `finishesAgainst` positions (training only) | same | top 1 |
 | `ImprovingWinRate` | Trend | `winRateDelta ≥ TrendDelta` | `winRate, previousWinRate, delta` | 1 |
@@ -174,7 +174,7 @@ Period 2026-09-01..2026-09-30, filters none, training thresholds. 20 rounds:
 | Win | Triangle (choke) | closed_guard | 2 |
 | Win | Kimura (shoulder_lock) | none | 2 |
 | Win | none | none | 4 |
-| Loss | Inside Heel Hook (leg_lock) | leg_entanglement | 2 |
+| Loss | Inside Heel Hook (leg_lock) | saddle | 2 |
 | Loss | Guillotine (choke) | none | 1 |
 | Loss | Rear Naked Choke (choke) | back_control | 1 |
 | Loss | none | none | 2 |
@@ -184,8 +184,8 @@ Expected:
 
 - `totals`: rounds 20, wins 12, losses 6, draws 2, `winRate` 0.6, `balance` 6.
 - `finishesFor.total` 8. `byTechnique`: RNC 4 (0.5), Triangle 2 (0.25), Kimura 2 (0.25). `byCategory`: choke 6 (0.75), shoulder_lock 2 (0.25). `byPosition`: recorded 5; back_control 3 (0.6), closed_guard 2 (0.4).
-- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: leg_lock 2 (0.5), choke 2 (0.5). `byPosition`: recorded 3; leg_entanglement 2 (0.6667), back_control 1 (0.3333).
-- Insights (training): `DominantFinisherTechnique` = RNC only (Triangle 0.25 < 0.30); `DominantFinisherCategory` = choke (0.75); `StrongPosition` = back_control (closed_guard has share 0.4 but count 2 < 3); **no** `RecurringSubmission*` (finishesAgainst.total 4 < 5); **no** `VulnerablePosition` (recorded 3 < 5).
+- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: leg_lock 2 (0.5), choke 2 (0.5). `byPosition`: recorded 3; saddle 2 (0.6667), back_control 1 (0.3333).
+- Insights (training): `DominantFinisherTechnique` = RNC only (Triangle 0.25 < 0.30); `DominantFinisherCategory` = choke (0.75); `StrongPosition` = back_control (closed_guard has share 0.4 but count 2 < 3); **no** `RecurringLoss*` (finishesAgainst.total 4 < 5); **no** `VulnerablePosition` (recorded 3 < 5).
 
 ### GT-02: Insufficient data
 

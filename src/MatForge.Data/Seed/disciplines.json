@@ -1,0 +1,51 @@
+[
+  {
+    "code": "bjj",
+    "name": "Brazilian Jiu-Jitsu",
+    "formats": [
+      { "code": "gi", "name": "Gi" },
+      { "code": "nogi", "name": "No-Gi" }
+    ],
+    "belts": [
+      { "code": "white", "name": "White", "minDegree": 0, "maxDegree": 4 },
+      { "code": "blue", "name": "Blue", "minDegree": 0, "maxDegree": 4 },
+      { "code": "purple", "name": "Purple", "minDegree": 0, "maxDegree": 4 },
+      { "code": "brown", "name": "Brown", "minDegree": 0, "maxDegree": 4 },
+      { "code": "black", "name": "Black", "minDegree": 0, "maxDegree": 6 }
+    ]
+  },
+  {
+    "code": "wrestling",
+    "name": "Wrestling",
+    "formats": [
+      { "code": "freestyle", "name": "Freestyle" },
+      { "code": "greco_roman", "name": "Greco-Roman" }
+    ],
+    "belts": []
+  },
+  {
+    "code": "judo",
+    "name": "Judo",
+    "formats": [
+      { "code": "standard", "name": "Standard" }
+    ],
+    "belts": [
+      { "code": "white", "name": "White", "minDegree": 0, "maxDegree": 0 },
+      { "code": "yellow", "name": "Yellow", "minDegree": 0, "maxDegree": 0 },
+      { "code": "orange", "name": "Orange", "minDegree": 0, "maxDegree": 0 },
+      { "code": "green", "name": "Green", "minDegree": 0, "maxDegree": 0 },
+      { "code": "blue", "name": "Blue", "minDegree": 0, "maxDegree": 0 },
+      { "code": "brown", "name": "Brown", "minDegree": 0, "maxDegree": 0 },
+      { "code": "black", "name": "Black", "minDegree": 1, "maxDegree": 10 }
+    ]
+  },
+  {
+    "code": "sambo",
+    "name": "Sambo",
+    "formats": [
+      { "code": "sport", "name": "Sport Sambo" },
+      { "code": "combat", "name": "Combat Sambo" }
+    ],
+    "belts": []
+  }
+]
