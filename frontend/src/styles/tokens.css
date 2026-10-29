@@ -1,0 +1,21 @@
+/* The only place with color values. */
+:root {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --chrome: #000000;
+  --chrome-text: #ffffff;
+  --chrome-text-muted: #abadb1;
+  --line: #d5d6d8;
+  --text: #191919;
+  --text-muted: #585b63;
+  --brand: #d20a0a;
+  --brand-text: #d20a0a;
+  --on-brand: #ffffff;
+  --win: #1f7a4a;
+  --loss: #d20a0a;
+  --draw: #6b6e75;
+
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+  --radius: 2px;
+}
