@@ -24,8 +24,9 @@ public class DatabaseFixture : IAsyncLifetime
         await db.Database.MigrateAsync();
     }
 
-    public AppDbContext CreateDbContext() =>
-        new(new DbContextOptionsBuilder<AppDbContext>().UseSqlServer(ConnectionString).Options);
+    public AppDbContext CreateDbContext(Guid? currentUserId = null) =>
+        new(new DbContextOptionsBuilder<AppDbContext>().UseSqlServer(ConnectionString).Options,
+            new TestCurrentUser(currentUserId));
 
     public async Task DisposeAsync() => await _container.DisposeAsync();
 }
