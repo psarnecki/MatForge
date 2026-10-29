@@ -1,4 +1,5 @@
 using MatForge.Api.Infrastructure;
+using MatForge.Application.Features.Profile;
 using MatForge.Data;
 using MatForge.Data.Entities;
 using MatForge.Data.Seed;
@@ -17,10 +18,13 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<AppDbContext>();
 
-builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>());
+builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationErrors.CreateResponse);
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 var app = builder.Build();
 
