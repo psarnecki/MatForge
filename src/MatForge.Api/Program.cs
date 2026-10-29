@@ -1,6 +1,8 @@
 using MatForge.Api.Infrastructure;
 using MatForge.Data;
+using MatForge.Data.Entities;
 using MatForge.Data.Seed;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,11 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Connection string 'Default' not found.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<DictionarySeeder>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>());
 builder.Services.AddProblemDetails();
@@ -33,6 +40,19 @@ app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToke
         ? Results.Ok()
         : Results.StatusCode(StatusCodes.Status503ServiceUnavailable));
 
-app.MapControllers();
+app.UseAuthentication();
+app.UseAuthorization();
+
+var auth = app.MapGroup("/api/auth");
+auth.MapIdentityApi<AppUser>();
+
+// Logout endpoint (Identity API has none by default)
+auth.MapPost("/logout", async (SignInManager<AppUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.NoContent();
+});
+
+app.MapControllers().RequireAuthorization();
 
 app.Run();
