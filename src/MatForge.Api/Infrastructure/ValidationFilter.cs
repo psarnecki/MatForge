@@ -1,12 +1,10 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace MatForge.Api.Infrastructure;
 
 // Runs the FluentValidation validator of each action argument and answers 400 in the same format as DataAnnotations
-public class ValidationFilter(ProblemDetailsFactory problemDetailsFactory) : IAsyncActionFilter
+public class ValidationFilter : IAsyncActionFilter
 {
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -28,8 +26,7 @@ public class ValidationFilter(ProblemDetailsFactory problemDetailsFactory) : IAs
 
         if (!context.ModelState.IsValid)
         {
-            var problem = problemDetailsFactory.CreateValidationProblemDetails(context.HttpContext, context.ModelState);
-            context.Result = new BadRequestObjectResult(problem);
+            context.Result = ValidationErrors.CreateResponse(context);
             return;
         }
 

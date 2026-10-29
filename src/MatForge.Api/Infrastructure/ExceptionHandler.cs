@@ -12,7 +12,7 @@ public class ExceptionHandler(IProblemDetailsService problemDetailsService, ILog
     {
         ProblemDetails problem = exception switch
         {
-            BadRequestException badRequest => new ValidationProblemDetails(badRequest.Errors)
+            BadRequestException badRequest => new ValidationProblemDetails(ValidationErrors.ToCamelCaseKeys(badRequest.Errors))
             {
                 Status = StatusCodes.Status400BadRequest
             },
