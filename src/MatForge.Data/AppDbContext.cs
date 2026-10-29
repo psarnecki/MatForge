@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MatForge.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options)
+public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser)
     : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options)
 {
+    private Guid? CurrentUserId => currentUser.UserId;
+
     public DbSet<Discipline> Disciplines => Set<Discipline>();
     public DbSet<DisciplineFormat> DisciplineFormats => Set<DisciplineFormat>();
     public DbSet<TrainingCharacter> TrainingCharacters => Set<TrainingCharacter>();
@@ -82,5 +84,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         {
             foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
         }
+
+        // Every user sees only their own data (no rows when nobody is logged in)
+        modelBuilder.Entity<Club>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<UserBelt>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<TrainingSession>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<Competition>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<Goal>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<Material>().HasQueryFilter(e => e.UserId == CurrentUserId);
+        modelBuilder.Entity<BodyMeasurement>().HasQueryFilter(e => e.UserId == CurrentUserId);
+
+        // Rounds and fights have no UserId, so they are filtered through their parent
+        modelBuilder.Entity<SparringRound>().HasQueryFilter(r => r.TrainingSession.UserId == CurrentUserId);
+        modelBuilder.Entity<Fight>().HasQueryFilter(f => f.Competition.UserId == CurrentUserId);
     }
 }
