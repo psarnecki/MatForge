@@ -53,7 +53,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   throw new ApiError(response.status, data as ProblemDetails | undefined)
 }
 
-// Message for a toast or form; field errors are shown by the forms themselves
+// Error message for toasts and forms, with field errors handled separately
 export function errorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.status === 0) {
