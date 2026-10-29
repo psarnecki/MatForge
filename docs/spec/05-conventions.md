@@ -36,7 +36,7 @@ CQRS, MediatR, generic repository / unit-of-work, AutoMapper, generic base contr
 
 ## 3. Frontend
 
-- TypeScript `strict`, ESLint + Prettier configured, no `any`. Types stay simple: interfaces for DTOs and props, `useState<Type>`; no advanced generics, conditional, or mapped types. UI texts come from `src/texts.ts`.
+- TypeScript `strict`, the linter from the Vite template (oxlint, `npm run lint`), formatting from `.editorconfig` (no formatter package), no `any`. Types stay simple: interfaces for DTOs and props, `useState<Type>`; no advanced generics, conditional, or mapped types. UI texts come from `src/texts.ts`.
 - Components are function components with hooks. State is local (`useState`, `useEffect`); data comes from the API through one `apiFetch` helper and small hooks. No state-management or data-fetching library.
 - No business rules in the UI beyond input convenience; the server validates and calculates.
 - One component per file; feature code stays in its feature folder; shared pieces only when used by two or more features.
