@@ -36,6 +36,9 @@ using (var scope = app.Services.CreateScope())
 
 app.UseExceptionHandler();
 
+// Built frontend from wwwroot (in development Vite serves it instead)
+app.UseStaticFiles();
+
 app.MapOpenApi();
 app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "MatForge API"));
 
@@ -58,5 +61,9 @@ auth.MapPost("/logout", async (SignInManager<AppUser> signInManager) =>
 });
 
 app.MapControllers().RequireAuthorization();
+
+// Client-side routes (/training, /goals, ...) get index.html, unknown API paths get 404
+app.MapFallback("/api/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound));
+app.MapFallbackToFile("index.html");
 
 app.Run();
