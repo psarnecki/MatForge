@@ -41,7 +41,7 @@ export function RequireAuth() {
     }
   }, [navigate, showToast])
 
-  const value = useMemo(() => (user ? { user, logout } : null), [user, logout])
+  const value = useMemo(() => (user ? { user, setUser, logout } : null), [user, logout])
 
   if (error) {
     return (

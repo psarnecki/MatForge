@@ -3,6 +3,8 @@ import type { ProfileDto } from '../../types'
 
 interface CurrentUserValue {
   user: ProfileDto
+  // Allows the top bar to display the saved name immediately on the profile page
+  setUser: (user: ProfileDto) => void
   logout: () => Promise<void>
 }
 
