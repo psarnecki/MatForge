@@ -101,10 +101,11 @@
 }
 
 /* Toast */
+/* Fixed just below the top bar (64 px, 56 px on phone), so it stays visible while the page scrolls */
 .toast-region {
   position: fixed;
+  top: 80px;
   right: 16px;
-  bottom: 16px;
   left: 16px;
   display: flex;
   justify-content: center;
@@ -127,6 +128,12 @@
 
 .toast-error {
   border-left-color: var(--brand);
+}
+
+@media (max-width: 575px) {
+  .toast-region {
+    top: 72px;
+  }
 }
 
 
