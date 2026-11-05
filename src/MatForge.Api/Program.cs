@@ -1,4 +1,5 @@
 using MatForge.Api.Infrastructure;
+using MatForge.Application.Features.Lookups;
 using MatForge.Application.Features.Profile;
 using MatForge.Data;
 using MatForge.Data.Entities;
@@ -25,6 +26,7 @@ builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ILookupsService, LookupsService>();
 
 var app = builder.Build();
 
