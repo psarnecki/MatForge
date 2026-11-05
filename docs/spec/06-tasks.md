@@ -23,7 +23,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: integration tests pass for register → login → `GET /api/me` → logout → `401`, and a DbContext-level test (also in `MatForge.IntegrationTests`, on the container database) proves the isolation filter (two stub `ICurrentUser`s: a row added for user A is invisible to user B). Endpoint-level isolation tests start in T05 (clubs).
 
 **T04 Frontend skeleton** [04 §1-3] (MUST)
-- Vite + React + TypeScript project, `tokens.css` with the design tokens, fonts, `apiFetch`, hand-written DTO types (`src/types.ts`), UI texts in `src/texts.ts`, React Router, a few own small components (Button, Field, Select, Dialog, Toast), responsive app shell (black top bar on desktop / bottom tab bar on phone), login and register screens, auth guard.
+- Vite + React + TypeScript project, `tokens.css` with the design tokens, fonts, `apiFetch`, hand-written DTO types (`src/types.ts`), UI texts in `src/texts.ts`, React Router, a few own small components (Button, Field, Select, Dialog, Toast), responsive app shell (black top bar with links on desktop / with a hamburger side menu on phone), login and register screens, auth guard.
 - Accept: user can register and log in from the UI at 390 px and 1440 px; unauthenticated users are redirected to `/login`; the Dockerfile builds the frontend and `docker compose up --build` serves it from the API at `localhost:8080`.
 
 ## Phase 2: Profile and sessions
@@ -92,6 +92,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T19 Mobile and design polish** [04] (MUST)
 - Review every screen at 360, 390, 768, and 1440 px against `docs/design/` and the "do not do this" list; keyboard focus; contrast check; `prefers-reduced-motion`.
+- Register form: replace the one-line password hint with a live checklist under the password field, five short items (6+ characters, an uppercase letter, a lowercase letter, a digit, a symbol) that are ticked while the user types. The rules match the server's Identity password settings, which stay the real validation. Texts in `texts.ts`.
 - Accept: no horizontal scrolling at 360 px.
 
 ## Phase 7: Hardening and documentation

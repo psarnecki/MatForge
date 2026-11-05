@@ -73,6 +73,7 @@ Every decision below was made to keep implementation simple and fast. Change any
 | D-31 | `dotnet-ef` (the command-line tool for creating migrations) is installed globally on the author's machine in the version matching EF Core 10 (`dotnet tool update -g dotnet-ef`); no tool manifest in the repository. | Only the author creates migrations. Running the app needs no tool: migrations are applied at startup. |
 | D-32 | The seed JSON files are embedded in the `MatForge.Data` assembly (`EmbeddedResource`) and read by `DictionarySeeder` from there, so no file paths are involved (Rider, Docker, tests). | Nothing depends on the working directory or on copying files to the output folder. |
 | D-33 | Positions are linked to disciplines (many-to-many, seeded), like technique categories (D-29). A round accepts only a position offered in its session's discipline, and the UI offers only those. Leg entanglements are named specifically (outside and inside ashi garami, saddle, 50/50, ...) instead of one generic entry. | Each athlete sees only positions that fit the discipline (a wrestler never sees closed guard or saddle). Specific positions keep the statistics precise; `other_position` stays the last resort. |
+| D-34 | Frontend linting uses the linter that ships with the Vite template (oxlint, `npm run lint`). No Prettier: formatting follows `.editorconfig`. | Fewest packages; the template's default works without extra setup. |
 
 ## 5. Glossary
 

@@ -1,0 +1,57 @@
+.auth-bar {
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 32px;
+  background: var(--chrome);
+}
+
+/* Same white outline as the app shell's top bar */
+.auth-bar :focus-visible {
+  outline-color: var(--chrome-text);
+  outline-offset: -2px;
+}
+
+.auth-main {
+  max-width: 432px;
+  margin: 0 auto;
+  padding: 48px 16px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.auth-form .button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.auth-error {
+  color: var(--brand-text);
+}
+
+.auth-switch {
+  margin-top: 24px;
+  color: var(--text-muted);
+}
+
+.auth-guard-error {
+  max-width: 432px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+
+@media (max-width: 575px) {
+  .auth-bar {
+    height: 56px;
+    padding: 0 16px;
+  }
+
+  .auth-main {
+    padding-top: 32px;
+  }
+}

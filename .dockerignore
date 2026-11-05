@@ -1,5 +1,7 @@
 **/bin/
 **/obj/
+**/node_modules/
+frontend/dist/
 .git
 .idea
 docs/
