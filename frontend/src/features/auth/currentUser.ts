@@ -1,0 +1,23 @@
+import { createContext, useContext } from 'react'
+import type { ProfileDto } from '../../types'
+
+interface CurrentUserValue {
+  user: ProfileDto
+  logout: () => Promise<void>
+}
+
+export const CurrentUserContext = createContext<CurrentUserValue | null>(null)
+
+export function useCurrentUser() {
+  const context = useContext(CurrentUserContext)
+  if (!context) {
+    throw new Error('useCurrentUser must be used inside RequireAuth')
+  }
+  return context
+}
+
+// The email stands in when registration did not save the names
+export function displayName(user: ProfileDto) {
+  const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
+  return name || user.email
+}

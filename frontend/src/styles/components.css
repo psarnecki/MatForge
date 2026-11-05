@@ -65,10 +65,17 @@
   border-color: var(--brand);
 }
 
+.field-hint {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 .field-error {
   margin-top: 4px;
   color: var(--brand-text);
   font-size: 14px;
+  white-space: pre-line;
 }
 
 /* Dialog */
@@ -105,8 +112,11 @@
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   max-width: 480px;
-  padding: 12px 16px;
+  padding: 4px 4px 4px 16px;
   border-left: 4px solid var(--win);
   border-radius: var(--radius);
   background: var(--chrome);
@@ -117,4 +127,204 @@
 
 .toast-error {
   border-left-color: var(--brand);
+}
+
+
+/* App shell: links in the top bar on desktop and tablet, a side menu on phone */
+.shell-topbar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 64px;
+  padding: 0 32px;
+  background: var(--chrome);
+}
+
+.shell-logo {
+  flex: none;
+  color: var(--chrome-text);
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.shell-links {
+  display: flex;
+  flex: 1;
+  gap: 28px;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+}
+
+.shell-link {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 64px;
+  /* The top border balances the underline, so the text sits on the bar's centre line like the logo and Log out */
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  color: var(--chrome-text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.shell-link:hover,
+.shell-link.active {
+  color: var(--chrome-text);
+}
+
+.shell-link.active {
+  border-bottom-color: var(--brand);
+}
+
+.shell-user {
+  color: var(--chrome-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.shell-logout {
+  flex: none;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--chrome-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.shell-logout:hover {
+  color: var(--chrome-text);
+}
+
+.shell-menu-button,
+.shell-profile-icon,
+.shell-menu {
+  display: none;
+}
+
+/* The default dark outline would vanish on the black chrome */
+.shell-topbar :focus-visible,
+.shell-menu :focus-visible {
+  outline-color: var(--chrome-text);
+  outline-offset: -2px;
+}
+
+.shell-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+@media (max-width: 991px) {
+  .shell-topbar,
+  .shell-links {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 575px) {
+  .shell-topbar {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 8px;
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .shell-logo {
+    text-align: center;
+  }
+
+  .shell-links,
+  .shell-user,
+  .shell-logout {
+    display: none;
+  }
+
+  .shell-menu-button,
+  .shell-profile-icon {
+    display: flex;
+    color: var(--chrome-text);
+  }
+
+  .shell-main {
+    padding: 16px;
+  }
+
+  /* Pinned to the top and bottom edges so it is exactly as tall as the visible screen */
+  .shell-menu[open] {
+    display: block;
+    inset: 0 auto 0 0;
+    width: min(320px, 85vw);
+    max-width: none;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: var(--chrome);
+    color: var(--chrome-text);
+  }
+
+  .shell-menu::backdrop {
+    background: var(--backdrop);
+  }
+
+  .shell-menu-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 6px 0 16px;
+  }
+
+  /* Same spot as the hamburger it covers */
+  .shell-menu-close {
+    margin-left: 12px;
+    color: var(--chrome-text);
+  }
+
+  /* On very short screens only the links scroll; Log out stays visible */
+  .shell-menu-links {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 8px;
+    overflow-y: auto;
+  }
+
+  .shell-menu-item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 0;
+    border-left: 3px solid transparent;
+    background: none;
+    color: var(--chrome-text);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .shell-menu-item.active {
+    border-left-color: var(--brand);
+  }
+
+  .shell-menu-logout {
+    margin-top: auto;
+    color: var(--chrome-text-muted);
+  }
 }
