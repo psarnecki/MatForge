@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MatForge.Application.Features.Clubs;
 
 namespace MatForge.Application.Features.Profile;
 
@@ -7,10 +8,8 @@ public record ProfileDto(
     string Email,
     string? FirstName,
     string? LastName,
-    List<ProfileClubDto> Clubs,
+    List<ClubDto> Clubs,
     List<ProfileBeltDto> Belts);
-
-public record ProfileClubDto(int Id, string Name);
 
 public record ProfileBeltDto(int DisciplineId, int BeltId, int Degree);
 

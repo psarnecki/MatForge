@@ -69,7 +69,7 @@ Cookie settings: HttpOnly, `SameSite=Lax`, `Secure` when the request is HTTPS. A
 |---|---|---|---|
 | GET | `/api/clubs` | | |
 | POST | `/api/clubs` | `{ name }` | 409 on duplicate name |
-| PUT | `/api/clubs/{id}` | `{ name }` | |
+| PUT | `/api/clubs/{id}` | `{ name }` | 409 on duplicate name |
 | DELETE | `/api/clubs/{id}` | | 409 if any session uses it |
 | PUT | `/api/me/belts` | `{ belts: [{ disciplineId, beltId, degree }] }` | Replaces the whole list. Returns the saved list. |
 

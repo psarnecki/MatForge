@@ -1,4 +1,5 @@
 using MatForge.Application.Common;
+using MatForge.Application.Features.Clubs;
 using MatForge.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ public class ProfileService(AppDbContext db, ICurrentUser currentUser) : IProfil
 
         var clubs = await db.Clubs
             .OrderBy(c => c.Name)
-            .Select(c => new ProfileClubDto(c.Id, c.Name))
+            .Select(c => new ClubDto(c.Id, c.Name))
             .ToListAsync(cancellationToken);
 
         var belts = await db.UserBelts

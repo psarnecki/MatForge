@@ -15,11 +15,11 @@ export interface ProfileDto {
   email: string
   firstName: string | null
   lastName: string | null
-  clubs: ProfileClubDto[]
+  clubs: ClubDto[]
   belts: ProfileBeltDto[]
 }
 
-export interface ProfileClubDto {
+export interface ClubDto {
   id: number
   name: string
 }
