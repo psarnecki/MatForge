@@ -1,3 +1,4 @@
+using FluentValidation;
 using MatForge.Api.Infrastructure;
 using MatForge.Application.Features.Clubs;
 using MatForge.Application.Features.Lookups;
@@ -29,6 +30,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ILookupsService, LookupsService>();
 builder.Services.AddScoped<IClubService, ClubService>();
+
+builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
 
 var app = builder.Build();
 

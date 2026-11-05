@@ -21,3 +21,11 @@ public class UpdateProfileRequest
     [StringLength(100)]
     public string? LastName { get; init; }
 }
+
+public class UpdateBeltsRequest
+{
+    [Required]
+    public List<BeltRequest> Belts { get; init; } = [];
+}
+
+public record BeltRequest(int DisciplineId, int BeltId, int Degree);
