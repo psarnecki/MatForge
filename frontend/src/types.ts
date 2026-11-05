@@ -31,7 +31,7 @@ export interface ProfileBeltDto {
 }
 
 export interface UpdateProfileRequest {
-  firstName: string | null
+  firstName: string
   lastName: string | null
 }
 

@@ -15,8 +15,9 @@ public record ProfileBeltDto(int DisciplineId, int BeltId, int Degree);
 
 public class UpdateProfileRequest
 {
+    [Required]
     [StringLength(100)]
-    public string? FirstName { get; init; }
+    public string FirstName { get; init; } = string.Empty;
 
     [StringLength(100)]
     public string? LastName { get; init; }

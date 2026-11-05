@@ -35,8 +35,8 @@ public class ProfileService(AppDbContext db, ICurrentUser currentUser) : IProfil
         var user = await db.Users.SingleOrDefaultAsync(u => u.Id == UserId, cancellationToken)
             ?? throw new NotFoundException("User not found.");
 
-        user.FirstName = request.FirstName;
-        user.LastName = request.LastName;
+        user.FirstName = request.FirstName.Trim();
+        user.LastName = string.IsNullOrWhiteSpace(request.LastName) ? null : request.LastName.Trim();
         await db.SaveChangesAsync(cancellationToken);
 
         return await GetAsync(cancellationToken);
