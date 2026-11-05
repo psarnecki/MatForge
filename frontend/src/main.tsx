@@ -9,6 +9,7 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './styles/components.css'
 import './styles/auth.css'
+import './styles/profile.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
