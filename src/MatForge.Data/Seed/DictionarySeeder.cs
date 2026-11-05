@@ -57,8 +57,8 @@ public class DictionarySeeder(AppDbContext db)
         await UpsertAsync(db.MaterialCategories, Read<SeedEntry>("material-categories.json"), (_, _) => { }, cancellationToken);
     }
 
-    // Adds missing rows and updates existing ones found by code; rows are never deleted.
-    // SortOrder follows the order of the entries in the seed file.
+    // Adds missing rows and updates existing ones found by code (rows are never deleted)
+    // SortOrder follows the order of the entries in the seed file
     private async Task<Dictionary<string, TEntity>> UpsertAsync<TEntity, TSeed>(
         IQueryable<TEntity> existingRows,
         IReadOnlyList<TSeed> seeds,
@@ -88,7 +88,7 @@ public class DictionarySeeder(AppDbContext db)
         return rows;
     }
 
-    // Link rows are the only rows the seeder deletes: they must match the seed exactly.
+    // Link rows are the only rows the seeder deletes: they must match the seed exactly
     private async Task SyncDisciplineLinksAsync<TLink>(
         DbSet<TLink> links,
         IEnumerable<(int OwnerId, int DisciplineId)> wantedLinks,

@@ -293,7 +293,7 @@
     color: var(--chrome-text);
   }
 
-  /* On very short screens only the links scroll; Log out stays visible */
+  /* On very short screens only the links scroll (Log out stays visible) */
   .shell-menu-links {
     display: flex;
     flex: 1;

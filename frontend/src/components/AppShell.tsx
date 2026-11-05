@@ -12,7 +12,8 @@ const navItems = [
   { to: '/body', label: texts.nav.body },
 ]
 
-// Desktop and tablet: links in the top bar; phone: a hamburger opens the same links in a side panel
+// Desktop and tablet: links in the top bar
+// Phone: a hamburger opens the same links in a side panel
 export function AppShell() {
   const { user, logout } = useCurrentUser()
   const { pathname } = useLocation()

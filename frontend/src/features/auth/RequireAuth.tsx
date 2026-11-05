@@ -6,7 +6,7 @@ import { texts } from '../../texts'
 import type { ProfileDto } from '../../types'
 import { CurrentUserContext } from './currentUser'
 
-// Loads the signed-in user; a 401 from /me sends the visitor to /login (apiFetch)
+// Loads the signed-in user (a 401 from /me sends the visitor to /login through apiFetch)
 export function RequireAuth() {
   const [user, setUser] = useState<ProfileDto | null>(null)
   const [error, setError] = useState<string | null>(null)
