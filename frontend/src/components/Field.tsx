@@ -5,15 +5,18 @@ interface FieldProps {
   value: string
   onChange: (value: string) => void
   type?: 'text' | 'email' | 'password' | 'number' | 'date'
+  hint?: string
   error?: string
   autoComplete?: string
   required?: boolean
   maxLength?: number
 }
 
-export function Field({ label, value, onChange, type = 'text', error, autoComplete, required, maxLength }: FieldProps) {
+export function Field({ label, value, onChange, type = 'text', hint, error, autoComplete, required, maxLength }: FieldProps) {
   const id = useId()
+  const hintId = `${id}-hint`
   const errorId = `${id}-error`
+  const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ')
 
   return (
     <div className="field">
@@ -27,8 +30,13 @@ export function Field({ label, value, onChange, type = 'text', error, autoComple
         required={required}
         maxLength={maxLength}
         aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={describedBy || undefined}
       />
+      {hint && (
+        <p id={hintId} className="field-hint">
+          {hint}
+        </p>
+      )}
       {error && (
         <p id={errorId} className="field-error">
           {error}
