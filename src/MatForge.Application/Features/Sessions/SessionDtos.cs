@@ -74,3 +74,14 @@ public class RoundRequest
     [StringLength(500)]
     public string? Notes { get; init; }
 }
+
+public class SessionListQuery
+{
+    [Required]
+    public DateOnly? From { get; init; }
+
+    [Required]
+    public DateOnly? To { get; init; }
+
+    public SessionKind? Kind { get; init; }
+}

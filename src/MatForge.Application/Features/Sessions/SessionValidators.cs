@@ -176,3 +176,30 @@ public class SessionRequestValidator : AbstractValidator<SessionRequest>
         });
     }
 }
+
+public class SessionListQueryValidator : AbstractValidator<SessionListQuery>
+{
+    private const int MaxRangeDays = 400;
+
+    public SessionListQueryValidator()
+    {
+        // The range is in order and at most 400 days long
+        RuleFor(q => q.To).Custom((to, context) =>
+        {
+            var from = context.InstanceToValidate.From;
+            if (from == null || to == null)
+            {
+                return;
+            }
+
+            if (to < from)
+            {
+                context.AddFailure("Choose an end date that is not before the start date.");
+            }
+            else if (to.Value.DayNumber - from.Value.DayNumber > MaxRangeDays)
+            {
+                context.AddFailure($"Choose a range of at most {MaxRangeDays} days.");
+            }
+        });
+    }
+}
