@@ -2,7 +2,7 @@
 
 ## 1. Conventions
 
-- Base path `/api`. JSON, camelCase. Enums as strings. Dates `YYYY-MM-DD`.
+- Base path `/api`. JSON, camelCase. Enums as strings only (an integer or an unknown name returns `400`). Dates `YYYY-MM-DD`.
 - All endpoints require authentication **except** register, login, `/health`, and the OpenAPI document.
 - Unauthenticated calls return **`401`** (never a redirect).
 - Controllers are thin: they call one service method and return the result. Logic lives in `Application` services.
@@ -16,6 +16,7 @@
 | Not authenticated | 401 | empty or `ProblemDetails` |
 | Unexpected | 500 | `ProblemDetails`, no stack trace |
 
+- A reference to another user's record inside a request body returns `400` on that field with the same message as a missing record; the resource in the URL returns `404` (D-39).
 - Services throw `NotFoundException`, `ConflictException`, `BadRequestException(errors)`. One global `IExceptionHandler` maps them to the table above.
 - **Validation:** DataAnnotations for trivial single-field rules (`Required`, `StringLength`, `Range`); FluentValidation for cross-field rules. One reusable filter runs validators before the action and produces the same 400 format. The same rule is never written twice.
 - Create returns `201` with `Location` and the created resource. Update returns `200` with the updated resource. Delete returns `204`.
@@ -77,13 +78,13 @@ Cookie settings: HttpOnly, `SameSite=Lax`, `Secure` when the request is HTTPS. A
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/sessions?from=&to=&kind=` | `from` and `to` required (max range 400 days). Returns `SessionSummary[]` sorted by date, then id. |
+| GET | `/api/sessions?from=&to=&kind=` | `from` and `to` required (max range 400 days; `to` before `from` returns `400` on `to`). Returns `SessionSummary[]` sorted by date, then id. |
 | GET | `/api/sessions/{id}` | Full session with rounds |
 | POST | `/api/sessions` | Creates session with rounds |
 | PUT | `/api/sessions/{id}` | Replaces session and rounds |
 | DELETE | `/api/sessions/{id}` | |
 
-Request (flat, nullable fields by `kind`; rules in `01-domain-model.md` 4.4; rounds are accepted only when the character allows them):
+Request (flat, nullable fields by `kind`; rules in `01-domain-model.md` 4.4; rounds are accepted only when the character allows them; an unknown `characterId` or `activityTypeId` returns `400` on that field):
 
 ```json
 {

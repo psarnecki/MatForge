@@ -11,7 +11,7 @@ public class UpdateBeltsRequestValidator : AbstractValidator<UpdateBeltsRequest>
         // One belt per discipline, the belt belongs to that discipline, the degree is within the belt's range
         RuleFor(r => r.Belts).CustomAsync(async (belts, context, cancellationToken) =>
         {
-            var beltIds = belts.Select(b => b.BeltId).Distinct().ToList();
+            var beltIds = belts.OfType<BeltRequest>().Select(b => b.BeltId).Distinct().ToList();
             var knownBelts = await db.Belts
                 .Where(b => beltIds.Contains(b.Id))
                 .ToDictionaryAsync(b => b.Id, cancellationToken);
@@ -20,6 +20,14 @@ public class UpdateBeltsRequestValidator : AbstractValidator<UpdateBeltsRequest>
             for (var i = 0; i < belts.Count; i++)
             {
                 var item = belts[i];
+
+                // A JSON array can contain null entries
+                if (item is null)
+                {
+                    context.AddFailure($"Belts[{i}]", "Choose a belt.");
+                    continue;
+                }
+
                 if (!disciplineIds.Add(item.DisciplineId))
                 {
                     context.AddFailure($"Belts[{i}].DisciplineId", "Choose only one belt per discipline.");

@@ -7,7 +7,7 @@
 - Dates: `DateOnly`. Durations: minutes (`int`) unless stated. Metric units.
 - Enums are stored as **strings** in the database.
 - Nullable reference types enabled. A field marked `Req = no` is nullable.
-- **Isolation:** a user can never read or modify another user's data. Enforced centrally with EF Core global query filters on every entity that has a `UserId`. `SparringRound` and `Fight` are ordinary entities (own `DbSet`, no `UserId` column) reached through their parent; they get the equivalent filter through the parent navigation (for example `r.TrainingSession.UserId == currentUserId`), so a direct query is safe too and EF raises no warning. Analytics may load rounds as `Sessions.SelectMany(s => s.Rounds)`. Verified by integration tests written with each task (from T03) and completed in T20. A foreign key that points to someone else's record behaves as "not found".
+- **Isolation:** a user can never read or modify another user's data. Enforced centrally with EF Core global query filters on every entity that has a `UserId`. `SparringRound` and `Fight` are ordinary entities (own `DbSet`, no `UserId` column) reached through their parent; they get the equivalent filter through the parent navigation (for example `r.TrainingSession.UserId == currentUserId`), so a direct query is safe too and EF raises no warning. Analytics may load rounds as `Sessions.SelectMany(s => s.Rounds)`. Verified by integration tests written with each task (from T03) and completed in T20. A reference to another user's record inside a request body returns `400` on that field with the same message as a missing record; the resource in the URL returns `404` (D-39).
 
 ## 2. ERD
 

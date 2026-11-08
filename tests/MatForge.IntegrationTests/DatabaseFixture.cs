@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using MatForge.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Testcontainers.MsSql;
 
 namespace MatForge.IntegrationTests;
@@ -30,8 +31,8 @@ public class DatabaseFixture : IAsyncLifetime
         _ = ApiFactory.Server;
     }
 
-    public AppDbContext CreateDbContext(Guid? currentUserId = null) =>
-        new(new DbContextOptionsBuilder<AppDbContext>().UseSqlServer(ConnectionString).Options,
+    public AppDbContext CreateDbContext(Guid? currentUserId = null, params IInterceptor[] interceptors) =>
+        new(new DbContextOptionsBuilder<AppDbContext>().UseSqlServer(ConnectionString).AddInterceptors(interceptors).Options,
             new TestCurrentUser(currentUserId));
 
     // Registers a new user with a unique e-mail and returns a client that keeps the login cookie
