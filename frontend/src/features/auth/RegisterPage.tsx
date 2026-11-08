@@ -106,7 +106,6 @@ export function RegisterPage() {
             value={lastName}
             onChange={setLastName}
             autoComplete="family-name"
-            required
             maxLength={nameMaxLength}
           />
           {errors.form && (

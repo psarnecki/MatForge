@@ -1,6 +1,9 @@
 using System.Net;
+using System.Net.Http.Json;
 using FluentAssertions;
+using MatForge.Application.Features.Profile;
 using MatForge.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatForge.IntegrationTests.Profile;
@@ -27,6 +30,32 @@ public class ProfileTests(DatabaseFixture fixture)
         await using var db = fixture.CreateDbContext();
         (await CountRowsAsync(db, userA.Id)).Should().AllSatisfy(table => table.Value.Should().Be(0, table.Key));
         (await CountRowsAsync(db, userB.Id)).Should().AllSatisfy(table => table.Value.Should().Be(1, table.Key));
+    }
+
+    [Fact]
+    public async Task Update_with_empty_first_name_returns_400()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+
+        var response = await user.Client.PutAsJsonAsync("/api/me", new { firstName = "  ", lastName = "Kowalski" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadFromJsonAsync<ValidationProblemDetails>())!.Errors.Should().ContainKey("firstName");
+    }
+
+    [Fact]
+    public async Task Update_with_empty_last_name_clears_it()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        (await user.Client.PutAsJsonAsync("/api/me", new { firstName = "Jan", lastName = "Kowalski" }))
+            .EnsureSuccessStatusCode();
+
+        var response = await user.Client.PutAsJsonAsync("/api/me", new { firstName = " Jan ", lastName = " " });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var profile = await response.Content.ReadFromJsonAsync<ProfileDto>();
+        profile!.FirstName.Should().Be("Jan");
+        profile.LastName.Should().BeNull();
     }
 
     // Counts every user table without query filters (rounds and fights through their parent)

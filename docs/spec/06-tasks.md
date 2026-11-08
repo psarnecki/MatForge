@@ -34,7 +34,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T06 Sessions API** [01 §4.4-4.5, 02 §5] (MUST)
 - Service, DTOs, validators (I-01, I-03, I-05, I-10, I-11, kind rules), Mapperly mapper, controller, range query.
-- Accept: create/read/update/delete with rounds; every invariant has a failing-input unit test (validators); integration tests for the endpoints, including isolation; list returns summaries with round counts; rounds are rejected when the character does not allow them (I-09).
+- Accept: create/read/update/delete with rounds; every invariant has a failing-input validator test (unit test when no database is needed, otherwise against the test container); integration tests for the endpoints, including isolation; list returns summaries with round counts; rounds are rejected when the character does not allow them (I-09).
 
 **T07 Calendar and session form (without rounds)** [04 §4.3-4.4] (MUST)
 - Month calendar with markers, day list, session form for both kinds, edit and delete.
@@ -93,6 +93,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 **T19 Mobile and design polish** [04] (MUST)
 - Review every screen at 360, 390, 768, and 1440 px against `docs/design/` and the "do not do this" list; keyboard focus; contrast check; `prefers-reduced-motion`.
 - Register form: replace the one-line password hint with a live checklist under the password field, five short items (6+ characters, an uppercase letter, a lowercase letter, a digit, a symbol) that are ticked while the user types. The rules match the server's Identity password settings, which stay the real validation. Texts in `texts.ts`.
+- Review editing patterns: consider inline edit instead of a dialog for single-field lists (for example renaming a club). If both patterns are used, follow one rule: single-field list items are edited inline, forms with several fields use a dialog.
 - Accept: no horizontal scrolling at 360 px.
 
 ## Phase 7: Hardening and documentation
@@ -103,6 +104,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T21 Material for the thesis** (SHOULD)
 - ERD and an architecture diagram exported as images (from the Mermaid ERD in `01-domain-model.md` and the layers in `05-conventions.md`), and the list of endpoints from Swagger UI, for use in the thesis text.
+- Notes for the thesis text: where validation rules live and why (D-35: validators that query the database for `400`, services for `409`, compared with the author's VetClinic and MartialHub projects).
 - A short root `README.md` (a few lines): what the project is, `docker compose up --build`, the demo login, how to run the tests, and how to set the development connection string with `dotnet user-secrets` for running the API from the IDE (D-30). A fuller README with screenshots is optional (`08-optional.md`).
 
 **T22 Buffer and release** (MUST)

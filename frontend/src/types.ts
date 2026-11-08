@@ -15,11 +15,11 @@ export interface ProfileDto {
   email: string
   firstName: string | null
   lastName: string | null
-  clubs: ProfileClubDto[]
+  clubs: ClubDto[]
   belts: ProfileBeltDto[]
 }
 
-export interface ProfileClubDto {
+export interface ClubDto {
   id: number
   name: string
 }
@@ -31,6 +31,81 @@ export interface ProfileBeltDto {
 }
 
 export interface UpdateProfileRequest {
-  firstName: string | null
+  firstName: string
   lastName: string | null
+}
+
+export interface ClubRequest {
+  name: string
+}
+
+export interface BeltRequest {
+  disciplineId: number
+  beltId: number
+  degree: number
+}
+
+export interface UpdateBeltsRequest {
+  belts: BeltRequest[]
+}
+
+export interface LookupsDto {
+  disciplines: DisciplineDto[]
+  characters: TrainingCharacterDto[]
+  activityTypes: LookupItemDto[]
+  techniqueCategories: TechniqueCategoryDto[]
+  techniques: TechniqueDto[]
+  positions: PositionDto[]
+  materialCategories: LookupItemDto[]
+}
+
+export interface LookupItemDto {
+  id: number
+  code: string
+  name: string
+}
+
+export interface DisciplineDto {
+  id: number
+  code: string
+  name: string
+  formats: LookupItemDto[]
+  belts: BeltDto[]
+}
+
+export interface BeltDto {
+  id: number
+  code: string
+  name: string
+  rank: number
+  minDegree: number
+  maxDegree: number
+}
+
+export interface TrainingCharacterDto {
+  id: number
+  code: string
+  name: string
+  allowsRounds: boolean
+}
+
+export interface TechniqueCategoryDto {
+  id: number
+  code: string
+  name: string
+  disciplineIds: number[]
+}
+
+export interface TechniqueDto {
+  id: number
+  code: string
+  name: string
+  categoryId: number
+}
+
+export interface PositionDto {
+  id: number
+  code: string
+  name: string
+  disciplineIds: number[]
 }

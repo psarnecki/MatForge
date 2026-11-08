@@ -34,7 +34,7 @@ Identity API endpoints are mapped under `/api/auth` (`MapGroup("/api/auth").MapI
 | POST | `/api/auth/login?useCookies=true` | `{ email, password }`. Sets an HttpOnly cookie. |
 | POST | `/api/auth/logout` | **Custom endpoint**: the Identity API endpoints of .NET 8/9 have no logout (the Microsoft docs show a small custom one calling `SignInManager.SignOutAsync()`). If the installed version has a built-in one, use it instead. Signs out. `204`. |
 | GET | `/api/me` | `{ id, email, firstName, lastName, clubs[], belts[] }` |
-| PUT | `/api/me` | `{ firstName, lastName }` |
+| PUT | `/api/me` | `{ firstName, lastName }`. Both are trimmed. `firstName` is required and cannot be empty (`400`); `lastName` is optional, and an empty value is saved as `null` (D-36). |
 | DELETE | `/api/me` | Deletes the account and all data. `204`. |
 
 Registration in the UI is a chain: register → login → `PUT /api/me` (names). If the chain breaks, the profile page lets the user finish.
@@ -69,7 +69,7 @@ Cookie settings: HttpOnly, `SameSite=Lax`, `Secure` when the request is HTTPS. A
 |---|---|---|---|
 | GET | `/api/clubs` | | |
 | POST | `/api/clubs` | `{ name }` | 409 on duplicate name |
-| PUT | `/api/clubs/{id}` | `{ name }` | |
+| PUT | `/api/clubs/{id}` | `{ name }` | 409 on duplicate name |
 | DELETE | `/api/clubs/{id}` | | 409 if any session uses it |
 | PUT | `/api/me/belts` | `{ belts: [{ disciplineId, beltId, degree }] }` | Replaces the whole list. Returns the saved list. |
 

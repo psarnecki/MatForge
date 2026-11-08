@@ -17,6 +17,10 @@ public class ProfileController(IProfileService profileService, SignInManager<App
     public Task<ProfileDto> Update(UpdateProfileRequest request, CancellationToken cancellationToken) =>
         profileService.UpdateAsync(request, cancellationToken);
 
+    [HttpPut("belts")]
+    public Task<List<ProfileBeltDto>> UpdateBelts(UpdateBeltsRequest request, CancellationToken cancellationToken) =>
+        profileService.UpdateBeltsAsync(request, cancellationToken);
+
     [HttpDelete]
     public async Task<IActionResult> Delete(CancellationToken cancellationToken)
     {

@@ -1,0 +1,126 @@
+.profile {
+  max-width: 640px;
+}
+
+/* Sections are separated by a line, not by cards */
+.profile-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-section h2 {
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.profile-form .field {
+  width: 100%;
+}
+
+.profile-email span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.profile-muted {
+  color: var(--text-muted);
+}
+
+.profile-error {
+  color: var(--brand-text);
+}
+
+.profile-clubs {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  list-style: none;
+}
+
+.profile-club {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.profile-club-action {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-club-action:hover {
+  color: var(--text);
+}
+
+/* The button lines up with the input, below the field label */
+.profile-add-club {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profile-add-club .field {
+  flex: 1;
+}
+
+.profile-add-club .button {
+  margin-top: 24px;
+}
+
+/* Belt and degree side by side, the degree column stays narrow */
+.profile-belt {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 16px;
+  width: 100%;
+}
+
+.profile-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (max-width: 575px) {
+  .profile-names {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-add-club .button {
+    padding: 0 16px;
+  }
+
+  .profile-belt {
+    grid-template-columns: 1fr 120px;
+  }
+}

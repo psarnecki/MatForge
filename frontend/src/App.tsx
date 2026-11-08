@@ -5,6 +5,7 @@ import { ToastProvider } from './components/ToastProvider'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { RequireAuth } from './features/auth/RequireAuth'
+import { ProfilePage } from './features/profile/ProfilePage'
 import { texts } from './texts'
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
               <Route path="goals" element={<Placeholder title={texts.nav.goals} />} />
               <Route path="library" element={<Placeholder title={texts.nav.library} />} />
               <Route path="body" element={<Placeholder title={texts.nav.body} />} />
-              <Route path="profile" element={<Placeholder title={texts.nav.profile} />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
