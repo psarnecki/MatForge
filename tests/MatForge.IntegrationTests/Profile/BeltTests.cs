@@ -55,6 +55,18 @@ public class BeltTests(DatabaseFixture fixture)
     }
 
     [Fact]
+    public async Task Null_entry_returns_400_on_its_index()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+
+        var response = await user.Client.PutAsJsonAsync("/api/me/belts", new { belts = new object?[] { null } });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadFromJsonAsync<ValidationProblemDetails>())!.Errors.Keys
+            .Should().Equal("belts[0]");
+    }
+
+    [Fact]
     public async Task Put_does_not_touch_other_users_belts()
     {
         var userA = await fixture.CreateLoggedInUserAsync();
