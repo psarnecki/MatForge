@@ -96,6 +96,14 @@
   margin-top: 24px;
 }
 
+/* Belt and degree side by side, the degree column stays narrow */
+.profile-belt {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 16px;
+  width: 100%;
+}
+
 .profile-dialog-actions {
   display: flex;
   justify-content: flex-end;
@@ -110,5 +118,9 @@
 
   .profile-add-club .button {
     padding: 0 16px;
+  }
+
+  .profile-belt {
+    grid-template-columns: 1fr 120px;
   }
 }
