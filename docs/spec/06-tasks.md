@@ -32,7 +32,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - `GET /api/lookups`, clubs CRUD (409 rules), `PUT /api/me/belts`, profile screen.
 - Accept: club in use cannot be deleted (409, message shown in UI); belt must match discipline (400); isolation tests for clubs.
 
-**T06 Sessions API** [01 §4.4-4.5, 02 §5] (MUST)
+**T06 Sessions API** [01 §4.4-4.5, 02 §5] (MUST, done)
 - Service, DTOs, validators (I-01, I-03, I-05, I-10, I-11, kind rules), Mapperly mapper, controller, range query.
 - Accept: create/read/update/delete with rounds; every invariant has a failing-input validator test (unit test when no database is needed, otherwise against the test container); integration tests for the endpoints, including isolation; list returns summaries with round counts; rounds are rejected when the character does not allow them (I-09).
 
