@@ -1,8 +1,10 @@
+using System.Text.Json.Serialization;
 using FluentValidation;
 using MatForge.Api.Infrastructure;
 using MatForge.Application.Features.Clubs;
 using MatForge.Application.Features.Lookups;
 using MatForge.Application.Features.Profile;
+using MatForge.Application.Features.Sessions;
 using MatForge.Data;
 using MatForge.Data.Entities;
 using MatForge.Data.Seed;
@@ -22,7 +24,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
-    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationErrors.CreateResponse);
+    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = ValidationErrors.CreateResponse)
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddOpenApi();
@@ -30,8 +33,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ILookupsService, LookupsService>();
 builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
 
 builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
+builder.Services.AddScoped<IValidator<SessionRequest>, SessionRequestValidator>();
+builder.Services.AddScoped<IValidator<SessionListQuery>, SessionListQueryValidator>();
 
 var app = builder.Build();
 
