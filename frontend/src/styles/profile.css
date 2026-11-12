@@ -9,6 +9,10 @@
   border-top: 1px solid var(--line);
 }
 
+.profile h1 + .profile-section {
+  margin-top: 24px;
+}
+
 .profile-section h2 {
   margin-bottom: 16px;
   font-size: 22px;
