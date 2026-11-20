@@ -128,5 +128,12 @@ export const texts = {
     dayTitle,
     dayLabel: (date: Date, grappling: number, other: number) =>
       grappling + other > 0 ? `${dayTitle(date)}, ${sessionSplit(grappling, other)}` : dayTitle(date),
+    logTraining: 'Log training',
+    dayEmpty: 'Nothing logged on this day.',
+    sessionMeta: (minutes: number, feeling: number) => `${minutes} min, feeling ${feeling}`,
+    record: (wins: number, losses: number, draws: number) => `${wins}W ${losses}L ${draws}D`,
+    recordLabel: (wins: number, losses: number, draws: number) => `${wins} won, ${losses} lost, ${draws} drawn`,
+    newSessionTitle: 'Log training',
+    editSessionTitle: 'Edit training',
   },
 }

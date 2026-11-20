@@ -20,6 +20,8 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route index element={<Placeholder title={texts.nav.dashboard} />} />
               <Route path="training" element={<TrainingPage />} />
+              <Route path="training/new" element={<Placeholder title={texts.sessions.newSessionTitle} />} />
+              <Route path="training/:id" element={<Placeholder title={texts.sessions.editSessionTitle} />} />
               <Route path="competitions" element={<Placeholder title={texts.nav.competitions} />} />
               <Route path="goals" element={<Placeholder title={texts.nav.goals} />} />
               <Route path="library" element={<Placeholder title={texts.nav.library} />} />

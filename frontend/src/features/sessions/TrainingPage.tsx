@@ -1,7 +1,8 @@
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { monthGrid, parseIsoDate, toIsoDate, todayIso } from '../../lib/dates'
 import { texts } from '../../texts'
 import type { SessionSummaryDto } from '../../types'
+import { DaySessions } from './DaySessions'
 import { MonthCalendar } from './MonthCalendar'
 import { useSessions } from './useSessions'
 
@@ -42,6 +43,11 @@ export function TrainingPage() {
   return (
     <div className="sessions-page">
       <h1>{texts.sessions.title}</h1>
+      <div className="sessions-log">
+        <Link to="/training/new" className="button button-primary">
+          {texts.sessions.logTraining}
+        </Link>
+      </div>
       <div className="sessions-layout">
         <MonthCalendar
           year={year}
@@ -54,11 +60,7 @@ export function TrainingPage() {
           onSelect={selectDay}
           onShowMonth={showMonth}
         />
-        {error && (
-          <p className="sessions-error" role="alert">
-            {error}
-          </p>
-        )}
+        <DaySessions date={selected} sessions={sessions === null ? null : (sessionsByDate.get(selected) ?? [])} error={error} />
       </div>
     </div>
   )

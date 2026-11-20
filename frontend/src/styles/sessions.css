@@ -1,6 +1,43 @@
+/* Heading with action beside it on desktop and fixed bottom bar on mobile */
+.sessions-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.sessions-log .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+@media (max-width: 575px) {
+  .sessions-page {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 80px;
+  }
+
+  .sessions-log {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+
+  .sessions-log .button {
+    width: 100%;
+  }
+}
+
 /* One column on mobile and tablet, calendar and day panel side by side on desktop */
 .sessions-layout {
   display: grid;
+  grid-column: 1 / -1;
   gap: 32px;
   margin-top: 24px;
 }
@@ -141,7 +178,6 @@
   fill: var(--line);
 }
 
-/* Month picker dialog: year with arrows, then the twelve months */
 .sessions-picker-year {
   display: flex;
   align-items: center;
@@ -188,4 +224,53 @@
 
 .sessions-error {
   color: var(--brand-text);
+}
+
+.sessions-muted {
+  color: var(--text-muted);
+}
+
+/* Sessions of the selected day */
+.sessions-day-panel h2 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.sessions-list {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  list-style: none;
+}
+
+.sessions-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sessions-item:hover strong {
+  text-decoration: underline;
+}
+
+.sessions-item strong {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sessions-item .sessions-muted {
+  font-size: 14px;
+}
+
+.sessions-record {
+  flex: none;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
 }
