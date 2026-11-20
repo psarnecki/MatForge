@@ -12,7 +12,7 @@ export function TrainingPage() {
   const today = todayIso()
   const day = searchParams.get('day')
 
-  // The calendar, its arrows and the month picker stay between January 2000 and December of next year
+  // Calendar navigation is limited to January 2000 through December next year
   const firstYear = 2000
   const lastYear = Number(today.slice(0, 4)) + 1
   const dayYear = Number(day?.slice(0, 4))
@@ -43,8 +43,8 @@ export function TrainingPage() {
   return (
     <div className="sessions-page">
       <h1>{texts.sessions.title}</h1>
-      <div className="sessions-log">
-        <Link to="/training/new" className="button button-primary">
+      <div className="sessions-bar">
+        <Link to={`/training/new?day=${selected}`} className="button button-primary">
           {texts.sessions.logTraining}
         </Link>
       </div>

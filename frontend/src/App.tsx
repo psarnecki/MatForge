@@ -6,6 +6,7 @@ import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { SessionFormPage } from './features/sessions/SessionFormPage'
 import { TrainingPage } from './features/sessions/TrainingPage'
 import { texts } from './texts'
 
@@ -20,8 +21,8 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route index element={<Placeholder title={texts.nav.dashboard} />} />
               <Route path="training" element={<TrainingPage />} />
-              <Route path="training/new" element={<Placeholder title={texts.sessions.newSessionTitle} />} />
-              <Route path="training/:id" element={<Placeholder title={texts.sessions.editSessionTitle} />} />
+              <Route path="training/new" element={<SessionFormPage />} />
+              <Route path="training/:id" element={<SessionFormPage />} />
               <Route path="competitions" element={<Placeholder title={texts.nav.competitions} />} />
               <Route path="goals" element={<Placeholder title={texts.nav.goals} />} />
               <Route path="library" element={<Placeholder title={texts.nav.library} />} />

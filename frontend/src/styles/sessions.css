@@ -6,7 +6,8 @@
   column-gap: 16px;
 }
 
-.sessions-log .button {
+/* Log training and Save session: a plain button on desktop, a bar fixed to the bottom on mobile */
+.sessions-bar .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -16,10 +17,15 @@
 @media (max-width: 575px) {
   .sessions-page {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Keeps the end of the page visible above the bar */
+  .sessions-page,
+  .sessions-form-page {
     padding-bottom: 80px;
   }
 
-  .sessions-log {
+  .sessions-bar {
     position: fixed;
     right: 0;
     bottom: 0;
@@ -29,7 +35,7 @@
     background: var(--bg);
   }
 
-  .sessions-log .button {
+  .sessions-bar .button {
     width: 100%;
   }
 }
@@ -273,4 +279,125 @@
   font-family: var(--font-heading);
   font-size: 22px;
   font-weight: 700;
+}
+
+/* Session form uses a single-column layout matching the calendar width */
+.sessions-form-page {
+  max-width: 560px;
+}
+
+.sessions-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sessions-back:hover {
+  color: var(--text);
+}
+
+.sessions-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.sessions-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Match Field and Select labels for grouped controls */
+.sessions-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.sessions-segments {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.sessions-segments button {
+  flex: 1;
+  height: calc(var(--control-height) - 2px);
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sessions-segments button:last-child {
+  border-right: 0;
+}
+
+.sessions-segments button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.sessions-quick {
+  margin-top: 8px;
+}
+
+.sessions-notes {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 500;
+  resize: vertical;
+}
+
+.sessions-form .sessions-error {
+  white-space: pre-line;
+}
+
+/* Save on the left and Delete on the right; on mobile Save moves to the bottom bar */
+.sessions-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 575px) {
+  .sessions-actions {
+    display: block;
+  }
+
+  .sessions-actions > .button {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+.sessions-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sessions-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
