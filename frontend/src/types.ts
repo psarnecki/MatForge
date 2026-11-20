@@ -49,6 +49,70 @@ export interface UpdateBeltsRequest {
   belts: BeltRequest[]
 }
 
+export type SessionKind = 'Grappling' | 'Other'
+
+export type RoundResult = 'Win' | 'Loss' | 'Draw'
+
+export interface RoundDto {
+  result: RoundResult
+  techniqueId: number | null
+  positionId: number | null
+  notes: string | null
+}
+
+export interface SessionDto {
+  id: number
+  kind: SessionKind
+  date: string
+  durationMinutes: number
+  feeling: number
+  notes: string | null
+  disciplineId: number | null
+  formatId: number | null
+  characterId: number | null
+  clubId: number | null
+  activityTypeId: number | null
+  rounds: RoundDto[]
+}
+
+export interface SessionSummaryDto {
+  id: number
+  kind: SessionKind
+  date: string
+  durationMinutes: number
+  feeling: number
+  disciplineId: number | null
+  formatId: number | null
+  characterId: number | null
+  clubId: number | null
+  activityTypeId: number | null
+  roundsCount: number
+  wins: number
+  losses: number
+  draws: number
+}
+
+export interface RoundRequest {
+  result: RoundResult
+  techniqueId: number | null
+  positionId: number | null
+  notes: string | null
+}
+
+export interface SessionRequest {
+  kind: SessionKind
+  date: string | null
+  durationMinutes: number
+  feeling: number
+  notes: string | null
+  disciplineId: number | null
+  formatId: number | null
+  characterId: number | null
+  clubId: number | null
+  activityTypeId: number | null
+  rounds: RoundRequest[]
+}
+
 export interface LookupsDto {
   disciplines: DisciplineDto[]
   characters: TrainingCharacterDto[]
