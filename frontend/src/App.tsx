@@ -6,6 +6,7 @@ import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { TrainingPage } from './features/sessions/TrainingPage'
 import { texts } from './texts'
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route element={<AppShell />}>
               <Route index element={<Placeholder title={texts.nav.dashboard} />} />
-              <Route path="training" element={<Placeholder title={texts.nav.training} />} />
+              <Route path="training" element={<TrainingPage />} />
               <Route path="competitions" element={<Placeholder title={texts.nav.competitions} />} />
               <Route path="goals" element={<Placeholder title={texts.nav.goals} />} />
               <Route path="library" element={<Placeholder title={texts.nav.library} />} />

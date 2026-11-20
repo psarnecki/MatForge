@@ -1,3 +1,21 @@
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+
+// In the order of Date.getDay()
+const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const dayTitle = (date: Date) => `${weekdayNames[date.getDay()]}, ${date.getDate()} ${monthNames[date.getMonth()]}`
+
+const sessionCount = (count: number) => (count === 1 ? '1 session' : `${count} sessions`)
+
+// "3 sessions: 2 grappling, 1 other", leaving out a kind the day does not have
+const sessionSplit = (grappling: number, other: number) => {
+  const parts = [grappling > 0 && `${grappling} grappling`, other > 0 && `${other} other`].filter(Boolean)
+  return `${sessionCount(grappling + other)}: ${parts.join(', ')}`
+}
+
 export const texts = {
   appName: 'MatForge',
   nav: {
@@ -93,5 +111,22 @@ export const texts = {
     deleteAccount: 'Delete account',
     confirmEmail: 'Type your email to confirm',
     accountDeleted: 'Account deleted',
+  },
+  sessions: {
+    title: 'Training',
+    // Starts on Monday to match the calendar grid
+    weekdaysShort: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    monthTitle: (year: number, month: number) => `${monthNames[month]} ${year}`,
+    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    chooseMonth: 'Choose month and year',
+    // Starts with the visible title for voice control accessibility
+    chooseMonthLabel: (year: number, month: number) => `${monthNames[month]} ${year}, choose month and year`,
+    previousYear: 'Previous year',
+    nextYear: 'Next year',
+    dayTitle,
+    dayLabel: (date: Date, grappling: number, other: number) =>
+      grappling + other > 0 ? `${dayTitle(date)}, ${sessionSplit(grappling, other)}` : dayTitle(date),
   },
 }
