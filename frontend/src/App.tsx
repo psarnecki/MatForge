@@ -5,6 +5,7 @@ import { ToastProvider } from './components/ToastProvider'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
 import { RequireAuth } from './features/auth/RequireAuth'
+import { CompetitionsPage } from './features/competitions/CompetitionsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { SessionFormPage } from './features/sessions/SessionFormPage'
 import { TrainingPage } from './features/sessions/TrainingPage'
@@ -23,7 +24,7 @@ export default function App() {
               <Route path="training" element={<TrainingPage />} />
               <Route path="training/new" element={<SessionFormPage />} />
               <Route path="training/:id" element={<SessionFormPage />} />
-              <Route path="competitions" element={<Placeholder title={texts.nav.competitions} />} />
+              <Route path="competitions" element={<CompetitionsPage />} />
               <Route path="goals" element={<Placeholder title={texts.nav.goals} />} />
               <Route path="library" element={<Placeholder title={texts.nav.library} />} />
               <Route path="body" element={<Placeholder title={texts.nav.body} />} />

@@ -11,6 +11,7 @@ import './styles/components.css'
 import './styles/auth.css'
 import './styles/profile.css'
 import './styles/sessions.css'
+import './styles/competitions.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

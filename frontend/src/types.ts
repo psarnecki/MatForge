@@ -113,6 +113,77 @@ export interface SessionRequest {
   rounds: RoundRequest[]
 }
 
+export type FightResult = 'Win' | 'Loss' | 'Draw'
+
+export type FightMethod = 'Submission' | 'Throw' | 'Pin' | 'Points' | 'Decision' | 'Disqualification' | 'Walkover'
+
+export interface FightDto {
+  opponentName: string | null
+  result: FightResult
+  method: FightMethod | null
+  techniqueId: number | null
+  durationSeconds: number | null
+  notes: string | null
+}
+
+export interface CompetitionDto {
+  id: number
+  name: string
+  date: string
+  location: string | null
+  disciplineId: number
+  formatId: number
+  ageCategory: string | null
+  skillLevel: string | null
+  weightCategory: string | null
+  place: number | null
+  resultNote: string | null
+  notes: string | null
+  fights: FightDto[]
+}
+
+export interface CompetitionSummaryDto {
+  id: number
+  name: string
+  date: string
+  location: string | null
+  disciplineId: number
+  formatId: number
+  ageCategory: string | null
+  skillLevel: string | null
+  weightCategory: string | null
+  place: number | null
+  resultNote: string | null
+  fightsCount: number
+  wins: number
+  losses: number
+  draws: number
+}
+
+export interface FightRequest {
+  opponentName: string | null
+  result: FightResult | null
+  method: FightMethod | null
+  techniqueId: number | null
+  durationSeconds: number | null
+  notes: string | null
+}
+
+export interface CompetitionRequest {
+  name: string
+  date: string | null
+  location: string | null
+  disciplineId: number | null
+  formatId: number | null
+  ageCategory: string | null
+  skillLevel: string | null
+  weightCategory: string | null
+  place: number | null
+  resultNote: string | null
+  notes: string | null
+  fights: FightRequest[]
+}
+
 export interface LookupsDto {
   disciplines: DisciplineDto[]
   characters: TrainingCharacterDto[]

@@ -16,6 +16,13 @@ const sessionSplit = (grappling: number, other: number) => {
   return `${sessionCount(grappling + other)}: ${parts.join(', ')}`
 }
 
+// Formats a number as an ordinal (1st, 2nd, 3rd, etc.)
+const ordinal = (n: number) => {
+  const lastTwo = n % 100
+  const suffix = lastTwo >= 11 && lastTwo <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')
+  return `${n}${suffix}`
+}
+
 export const texts = {
   appName: 'MatForge',
   nav: {
@@ -187,5 +194,21 @@ export const texts = {
     deleteSession: 'Delete session',
     deleteSessionQuestion: (date: Date) => `Delete the session of ${dayTitle(date)}? This cannot be undone.`,
     sessionDeleted: 'Session deleted',
+  },
+  competitions: {
+    title: 'Competitions',
+    addCompetition: 'Add competition',
+    empty: 'No competitions yet. Add a competition and its fights to see your record here.',
+    date: 'Date',
+    competition: 'Competition',
+    place: 'Place',
+    record: 'Record',
+    // Formats a date as "12 Sep 2026"
+    shortDate: (date: Date) => `${date.getDate()} ${monthNames[date.getMonth()].slice(0, 3)} ${date.getFullYear()}`,
+    medals: { 1: 'Gold', 2: 'Silver', 3: 'Bronze' } as Record<number, string>,
+    placeOrdinal: ordinal,
+    noPlace: 'No place',
+    recordText: (wins: number, losses: number, draws: number) => `${wins}W ${losses}L ${draws}D`,
+    recordLabel: (wins: number, losses: number, draws: number) => `${wins} won, ${losses} lost, ${draws} drawn`,
   },
 }
