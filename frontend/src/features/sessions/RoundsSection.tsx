@@ -12,13 +12,14 @@ interface RoundsSectionProps {
   lookups: LookupsDto
   disciplineId: string
   rounds: RoundValues[]
+  notice: string | null
   onAdd: (result: RoundResult) => void
   onUpdate: (key: number, patch: Partial<RoundValues>) => void
   onRemove: (key: number) => void
 }
 
 // One tap adds a round and the chips show their order
-export function RoundsSection({ lookups, disciplineId, rounds, onAdd, onUpdate, onRemove }: RoundsSectionProps) {
+export function RoundsSection({ lookups, disciplineId, rounds, notice, onAdd, onUpdate, onRemove }: RoundsSectionProps) {
   const [editingKey, setEditingKey] = useState<number | null>(null)
   const winRef = useRef<HTMLButtonElement>(null)
   const removed = useRef(false)
@@ -63,6 +64,11 @@ export function RoundsSection({ lookups, disciplineId, rounds, onAdd, onUpdate, 
         ))}
       </div>
       {full && <p className="sessions-muted sessions-rounds-note">{texts.sessions.roundsLimit(maxRounds)}</p>}
+      {notice && (
+        <p className="sessions-muted sessions-rounds-note" role="status">
+          {notice}
+        </p>
+      )}
       {rounds.length > 0 && (
         <ol className="sessions-chips" aria-labelledby={labelId}>
           {rounds.map((round, index) => {

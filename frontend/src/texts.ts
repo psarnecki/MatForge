@@ -167,6 +167,9 @@ export const texts = {
       return `${count === 1 ? '1 round' : `${count} rounds`}: ${wins} W, ${losses} L, ${draws} D`
     },
     roundsLimit: (max: number) => `A session can have at most ${max} rounds.`,
+    // Notice shown after a discipline change when rounds are affected
+    roundsCleared: (discipline: string, rounds: number[]) =>
+      `${rounds.length === 1 ? 'Round' : 'Rounds'} ${rounds.join(', ')}: cleared the technique or position that is not available for ${discipline}.`,
     roundTitle: (number: number) => `Round ${number}`,
     result: 'Result',
     technique: 'Technique (optional)',

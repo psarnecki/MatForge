@@ -8,7 +8,7 @@ import { useToast } from '../../components/useToast'
 import { texts } from '../../texts'
 import type { ClubDto, LookupsDto, RoundResult, SessionDto, SessionKind, SessionRequest } from '../../types'
 import { saveLastSession } from './lastSession'
-import { toRoundRequest, type RoundValues } from './rounds'
+import { clearNotOffered, toRoundRequest, type RoundValues } from './rounds'
 import { RoundsSection } from './RoundsSection'
 import { SegmentedControl } from './SegmentedControl'
 
@@ -56,6 +56,8 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // Tracks rounds affected by the last discipline change until the next change
+  const [clearedNotice, setClearedNotice] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const nextRoundKey = useRef(initialValues.rounds.length)
   const notesId = useId()
@@ -77,17 +79,25 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   }
 
   // Formats depend on the discipline, with a single format selected automatically
+  // Clears techniques and positions not offered in the selected discipline (none when no discipline is chosen)
   function changeDiscipline(disciplineId: string) {
-    const formats = lookups.disciplines.find((item) => String(item.id) === disciplineId)?.formats ?? []
-    change({ disciplineId, formatId: formats.length === 1 ? String(formats[0].id) : '' })
+    const discipline = lookups.disciplines.find((item) => String(item.id) === disciplineId)
+    const formats = discipline?.formats ?? []
+    const { rounds, cleared } = discipline
+      ? clearNotOffered(values.rounds, lookups, disciplineId)
+      : { rounds: values.rounds, cleared: [] }
+    change({ disciplineId, formatId: formats.length === 1 ? String(formats[0].id) : '', rounds })
+    setClearedNotice(discipline && cleared.length > 0 ? texts.sessions.roundsCleared(discipline.name, cleared) : null)
   }
 
   function addRound(result: RoundResult) {
     const round: RoundValues = { key: nextRoundKey.current++, result, techniqueId: '', positionId: '', notes: '' }
     setValues((current) => ({ ...current, rounds: [...current.rounds, round] }))
+    setClearedNotice(null)
   }
 
   function updateRound(key: number, patch: Partial<RoundValues>) {
+    setClearedNotice(null)
     setValues((current) => ({
       ...current,
       rounds: current.rounds.map((round) => (round.key === key ? { ...round, ...patch } : round)),
@@ -95,6 +105,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   }
 
   function removeRound(key: number) {
+    setClearedNotice(null)
     setValues((current) => ({ ...current, rounds: current.rounds.filter((round) => round.key !== key) }))
   }
 
@@ -240,6 +251,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
           lookups={lookups}
           disciplineId={values.disciplineId}
           rounds={values.rounds}
+          notice={clearedNotice}
           onAdd={addRound}
           onUpdate={updateRound}
           onRemove={removeRound}

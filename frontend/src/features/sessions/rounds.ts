@@ -49,3 +49,21 @@ export function positionOptions(lookups: LookupsDto, disciplineId: string): Sele
     .filter((position) => position.disciplineIds.includes(Number(disciplineId)))
     .map((position) => ({ value: String(position.id), label: position.name }))
 }
+
+// Clears unavailable techniques and positions and returns changed round numbers
+export function clearNotOffered(rounds: RoundValues[], lookups: LookupsDto, disciplineId: string) {
+  const techniques = new Set(techniqueGroups(lookups, disciplineId).flatMap((group) => group.options.map((option) => option.value)))
+  const positions = new Set(positionOptions(lookups, disciplineId).map((option) => option.value))
+  const cleared: number[] = []
+  const kept = rounds.map((round, index) => {
+    const keepTechnique = !round.techniqueId || techniques.has(round.techniqueId)
+    // Also clears the position if its technique is removed
+    const keepPosition = !round.positionId || (keepTechnique && positions.has(round.positionId))
+    if (keepTechnique && keepPosition) {
+      return round
+    }
+    cleared.push(index + 1)
+    return { ...round, techniqueId: keepTechnique ? round.techniqueId : '', positionId: keepPosition ? round.positionId : '' }
+  })
+  return { rounds: kept, cleared }
+}
