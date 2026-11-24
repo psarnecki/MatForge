@@ -61,7 +61,6 @@ export function NameSection() {
             label={texts.profile.lastName}
             value={lastName}
             onChange={setLastName}
-            hint={texts.profile.lastNameHint}
             autoComplete="family-name"
             maxLength={nameMaxLength}
           />

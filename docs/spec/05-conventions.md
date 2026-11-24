@@ -42,6 +42,7 @@ CQRS, MediatR, generic repository / unit-of-work, AutoMapper, generic base contr
 - Components are function components with hooks. State is local (`useState`, `useEffect`); data comes from the API through one `apiFetch` helper and small hooks. No state-management or data-fetching library.
 - No business rules in the UI beyond input convenience; the server validates and calculates.
 - One component per file; feature code stays in its feature folder; shared pieces only when used by two or more features.
+- Pixel values in the spec and the mockups are CSS pixels (as on a screen at 100% scaling); a scaled display shows them larger.
 - Styling: plain CSS, **all in `src/styles/`**: `tokens.css` (the only place with color values), `base.css`, `components.css` (shared components), and one `<feature>.css` per feature with class names prefixed by the feature (`sessions-...`). No CSS modules, no UI library, no Tailwind, no inline style blobs.
 
 ## 4. Testing

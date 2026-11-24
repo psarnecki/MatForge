@@ -19,4 +19,12 @@
   --font-heading: 'Barlow Condensed', sans-serif;
   --font-body: 'Barlow', sans-serif;
   --radius: 2px;
+  /* Shared by inputs, selects and buttons */
+  --control-height: 40px;
+}
+
+@media (max-width: 575px) {
+  :root {
+    --control-height: 48px;
+  }
 }

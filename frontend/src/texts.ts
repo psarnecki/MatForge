@@ -1,3 +1,21 @@
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+
+// In the order of Date.getDay()
+const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const dayTitle = (date: Date) => `${weekdayNames[date.getDay()]}, ${date.getDate()} ${monthNames[date.getMonth()]}`
+
+const sessionCount = (count: number) => (count === 1 ? '1 session' : `${count} sessions`)
+
+// "3 sessions: 2 grappling, 1 other", leaving out a kind the day does not have
+const sessionSplit = (grappling: number, other: number) => {
+  const parts = [grappling > 0 && `${grappling} grappling`, other > 0 && `${other} other`].filter(Boolean)
+  return `${sessionCount(grappling + other)}: ${parts.join(', ')}`
+}
+
 export const texts = {
   appName: 'MatForge',
   nav: {
@@ -43,7 +61,7 @@ export const texts = {
       InvalidEmail: 'Enter a valid email address.',
     },
     firstName: 'First name',
-    lastName: 'Last name',
+    lastName: 'Last name (optional)',
     logIn: 'Log in',
     createAccount: 'Create account',
     noAccount: 'New to MatForge?',
@@ -60,8 +78,7 @@ export const texts = {
     nameTitle: 'Name',
     email: 'Email',
     firstName: 'First name',
-    lastName: 'Last name',
-    lastNameHint: 'Optional',
+    lastName: 'Last name (optional)',
     firstNameRequired: 'Enter your first name.',
     saveName: 'Save name',
     nameSaved: 'Name saved',
@@ -93,5 +110,58 @@ export const texts = {
     deleteAccount: 'Delete account',
     confirmEmail: 'Type your email to confirm',
     accountDeleted: 'Account deleted',
+  },
+  sessions: {
+    title: 'Training',
+    // Starts on Monday to match the calendar grid
+    weekdaysShort: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    monthTitle: (year: number, month: number) => `${monthNames[month]} ${year}`,
+    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    chooseMonth: 'Choose month and year',
+    // Starts with the visible title for voice control accessibility
+    chooseMonthLabel: (year: number, month: number) => `${monthNames[month]} ${year}, choose month and year`,
+    previousYear: 'Previous year',
+    nextYear: 'Next year',
+    dayTitle,
+    dayLabel: (date: Date, grappling: number, other: number) =>
+      grappling + other > 0 ? `${dayTitle(date)}, ${sessionSplit(grappling, other)}` : dayTitle(date),
+    logTraining: 'Log training',
+    dayEmpty: 'Nothing logged on this day.',
+    sessionMeta: (minutes: number, feeling: number) => `${minutes} min, feeling ${feeling}`,
+    record: (wins: number, losses: number, draws: number) => `${wins}W ${losses}L ${draws}D`,
+    recordLabel: (wins: number, losses: number, draws: number) => `${wins} won, ${losses} lost, ${draws} drawn`,
+    newSessionTitle: 'Log training',
+    editSessionTitle: 'Edit training',
+    backToTraining: 'Back to training',
+    kind: 'Kind',
+    kindGrappling: 'Grappling',
+    kindOther: 'Other',
+    date: 'Date',
+    dateRequired: 'Choose a date.',
+    duration: 'Duration (minutes)',
+    quickDuration: 'Quick duration',
+    durationInvalid: 'Enter a duration from 1 to 600 minutes.',
+    feeling: 'Feeling (1 = bad, 5 = great)',
+    feelingRequired: 'Choose how you felt, from 1 to 5.',
+    discipline: 'Discipline',
+    format: 'Format',
+    character: 'Character',
+    club: 'Club',
+    otherClub: 'Other',
+    activityType: 'Activity type',
+    choose: 'Choose',
+    notes: 'Notes (optional)',
+    saveSession: 'Save session',
+    sessionSaved: 'Session saved',
+    notFound: 'Session not found.',
+    // Shown after the server error when existing rounds do not match the selected character
+    roundsKept: (count: number, characters: string) =>
+      `This session has ${count === 1 ? '1 round' : `${count} rounds`}, which need one of these characters: ${characters}.`,
+    roundError: (round: number, message: string) => `Round ${round}: ${message}`,
+    deleteSession: 'Delete session',
+    deleteSessionQuestion: (date: Date) => `Delete the session of ${dayTitle(date)}? This cannot be undone.`,
+    sessionDeleted: 'Session deleted',
   },
 }

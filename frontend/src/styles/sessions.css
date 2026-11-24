@@ -1,0 +1,403 @@
+/* Heading with action beside it on desktop and fixed bottom bar on mobile */
+.sessions-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+}
+
+/* Log training and Save session: a plain button on desktop, a bar fixed to the bottom on mobile */
+.sessions-bar .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+@media (max-width: 575px) {
+  .sessions-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Keeps the end of the page visible above the bar */
+  .sessions-page,
+  .sessions-form-page {
+    padding-bottom: 80px;
+  }
+
+  .sessions-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+
+  .sessions-bar .button {
+    width: 100%;
+  }
+}
+
+/* One column on mobile and tablet, calendar and day panel side by side on desktop */
+.sessions-layout {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+@media (min-width: 992px) {
+  .sessions-layout {
+    grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+  }
+}
+
+.sessions-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sessions-month-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sessions-month-title svg {
+  color: var(--text-muted);
+}
+
+.sessions-month-title:hover {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.sessions-month-title:hover svg {
+  color: var(--text);
+}
+
+.sessions-month-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.sessions-weekdays,
+.sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.sessions-weekdays span {
+  padding: 4px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sessions-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 52px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.sessions-day:hover {
+  background: var(--surface);
+}
+
+.sessions-day-outside {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.sessions-day-today {
+  border-color: var(--brand);
+}
+
+.sessions-day[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--surface);
+}
+
+/* One square per kind, plus a count for multiple sessions.
+   Shared text baseline keeps squares and digits aligned at any scale. */
+.sessions-markers {
+  height: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 8px;
+  white-space: nowrap;
+}
+
+.sessions-markers > * + * {
+  margin-left: 4px;
+}
+
+.sessions-marker {
+  width: 8px;
+  height: 8px;
+  fill: var(--brand);
+}
+
+.sessions-marker-other {
+  fill: var(--text-muted);
+}
+
+/* The muted grey disappears on the dark selected day */
+.sessions-day[aria-pressed='true'] .sessions-marker-other {
+  fill: var(--line);
+}
+
+.sessions-picker-year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sessions-picker-year span {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessions-month-button:disabled {
+  color: var(--line);
+  cursor: default;
+}
+
+.sessions-picker-months {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.sessions-picker-month {
+  height: var(--control-height);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sessions-picker-month:hover {
+  border-color: var(--text);
+}
+
+.sessions-picker-month[aria-pressed='true'] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--surface);
+}
+
+.sessions-error {
+  color: var(--brand-text);
+}
+
+.sessions-muted {
+  color: var(--text-muted);
+}
+
+/* Sessions of the selected day */
+.sessions-day-panel h2 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.sessions-list {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  list-style: none;
+}
+
+.sessions-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.sessions-item:hover strong {
+  text-decoration: underline;
+}
+
+.sessions-item strong {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sessions-item .sessions-muted {
+  font-size: 14px;
+}
+
+.sessions-record {
+  flex: none;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Session form uses a single-column layout matching the calendar width */
+.sessions-form-page {
+  max-width: 560px;
+}
+
+.sessions-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sessions-back:hover {
+  color: var(--text);
+}
+
+.sessions-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.sessions-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Match Field and Select labels for grouped controls */
+.sessions-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.sessions-segments {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.sessions-segments button {
+  flex: 1;
+  height: calc(var(--control-height) - 2px);
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sessions-segments button:last-child {
+  border-right: 0;
+}
+
+.sessions-segments button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.sessions-quick {
+  margin-top: 8px;
+}
+
+.sessions-notes {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 500;
+  resize: vertical;
+}
+
+.sessions-form .sessions-error {
+  white-space: pre-line;
+}
+
+/* Save on the left and Delete on the right; on mobile Save moves to the bottom bar */
+.sessions-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 575px) {
+  .sessions-actions {
+    display: block;
+  }
+
+  .sessions-actions > .button {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+.sessions-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sessions-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
