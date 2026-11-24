@@ -14,7 +14,7 @@ export function DeleteAccountSection() {
       <h2 id="profile-delete-title">{texts.profile.deleteAccountTitle}</h2>
       <div className="profile-form">
         <p className="profile-muted">{texts.profile.deleteAccountInfo}</p>
-        <Button variant="secondary" onClick={() => setConfirming(true)}>
+        <Button variant="danger" onClick={() => setConfirming(true)}>
           {texts.profile.deleteAccount}
         </Button>
       </div>

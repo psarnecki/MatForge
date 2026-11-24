@@ -28,6 +28,17 @@
   color: var(--text);
 }
 
+.button-danger {
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  color: var(--brand-text);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
 .icon-button {
   display: flex;
   align-items: center;
@@ -138,8 +149,12 @@
 }
 
 
-/* App shell: links in the top bar on desktop and tablet, a side menu on phone */
+/* App navigation with top links on larger screens and a side menu on mobile */
+/* Header remains at the top while scrolling and keeps toasts below */
 .shell-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 28px;
