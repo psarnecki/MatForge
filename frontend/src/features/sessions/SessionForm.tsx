@@ -157,7 +157,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   const options = (items: { id: number; name: string }[]) => items.map((item) => ({ value: String(item.id), label: item.name }))
   const discipline = lookups.disciplines.find((item) => String(item.id) === values.disciplineId)
   const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
-  /// Shows one error line per invalid round in the current order
+  // Shows one error line per invalid round in the current order
   const roundErrorLines = showRounds
     ? values.rounds.flatMap((round, index) => {
         const errors = roundErrors[round.key] ?? {}
