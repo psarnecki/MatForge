@@ -6,8 +6,9 @@ import { Field } from '../../components/Field'
 import { Select, type SelectOption } from '../../components/Select'
 import { useToast } from '../../components/useToast'
 import { texts } from '../../texts'
-import type { ClubDto, LookupsDto, RoundRequest, SessionDto, SessionKind, SessionRequest } from '../../types'
+import type { ClubDto, LookupsDto, SessionDto, SessionKind, SessionRequest } from '../../types'
 import { saveLastSession } from './lastSession'
+import { toRoundRequest, type RoundValues } from './rounds'
 import { SegmentedControl } from './SegmentedControl'
 
 // Form values (also ids and numbers) as text, with empty strings for unselected fields
@@ -22,6 +23,8 @@ export interface SessionFormValues {
   clubId: string
   activityTypeId: string
   notes: string
+  // In the order they are saved
+  rounds: RoundValues[]
 }
 
 // Request fields whose server errors are shown under their input
@@ -43,13 +46,11 @@ interface SessionFormProps {
   initialValues: SessionFormValues
   // Set when editing
   sessionId?: number
-  // Rounds for the session
-  rounds: RoundRequest[]
   // Provided when editing to show the Delete session button
   onDelete?: () => void
 }
 
-export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, onDelete }: SessionFormProps) {
+export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete }: SessionFormProps) {
   const [values, setValues] = useState(initialValues)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
@@ -84,7 +85,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
     setFieldErrors({})
     setFormError(null)
     setSaving(true)
-    const request = toRequest(values, rounds)
+    const request = toRequest(values)
     try {
       const saved = sessionId
         ? await apiFetch<SessionDto>(`/sessions/${sessionId}`, { method: 'PUT', body: request })
@@ -103,7 +104,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 400) {
         const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
-        const errors = readErrors(caught.errors, request, texts.sessions.roundsKept(rounds.length, roundCharacters.join(', ')))
+        const errors = readErrors(caught.errors, request, texts.sessions.roundsKept(values.rounds.length,roundCharacters.join(', ')))
         setFieldErrors(errors.fields)
         setFormError(errors.form)
       } else {
@@ -255,7 +256,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
 
 // Switching kinds preserves the form values, but inactive fields are sent as null
 // Rounds are always sent so the server can validate them against the selected kind and character
-function toRequest(values: SessionFormValues, rounds: RoundRequest[]): SessionRequest {
+function toRequest(values: SessionFormValues): SessionRequest {
   const grappling = values.kind === 'Grappling'
   const id = (text: string) => (text ? Number(text) : null)
   return {
@@ -270,7 +271,7 @@ function toRequest(values: SessionFormValues, rounds: RoundRequest[]): SessionRe
     characterId: grappling ? id(values.characterId) : null,
     clubId: grappling ? id(values.clubId) : null,
     activityTypeId: grappling ? null : id(values.activityTypeId),
-    rounds,
+    rounds: values.rounds.map(toRoundRequest),
   }
 }
 
