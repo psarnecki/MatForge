@@ -34,6 +34,7 @@ export const texts = {
     close: 'Close',
     loading: 'Loading',
     cancel: 'Cancel',
+    done: 'Done',
   },
   errors: {
     unexpected: 'Something went wrong. Try again.',
@@ -166,6 +167,14 @@ export const texts = {
       return `${count === 1 ? '1 round' : `${count} rounds`}: ${wins} W, ${losses} L, ${draws} D`
     },
     roundsLimit: (max: number) => `A session can have at most ${max} rounds.`,
+    roundTitle: (number: number) => `Round ${number}`,
+    result: 'Result',
+    technique: 'Technique (optional)',
+    position: 'Position (optional)',
+    noTechnique: 'None',
+    noPosition: 'None',
+    chooseDisciplineFirst: 'Choose a discipline to add a technique and position.',
+    removeRound: 'Remove round',
     // Shown instead of the rounds section when the kind or character has no rounds
     roundsHidden: (count: number, characters: string) =>
       `${count === 1 ? '1 round' : `${count} rounds`} will not be saved. To keep ${count === 1 ? 'it' : 'them'}, choose a grappling session with one of these characters: ${characters}.`,

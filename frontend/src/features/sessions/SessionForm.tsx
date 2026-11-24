@@ -87,6 +87,17 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
     setValues((current) => ({ ...current, rounds: [...current.rounds, round] }))
   }
 
+  function updateRound(key: number, patch: Partial<RoundValues>) {
+    setValues((current) => ({
+      ...current,
+      rounds: current.rounds.map((round) => (round.key === key ? { ...round, ...patch } : round)),
+    }))
+  }
+
+  function removeRound(key: number) {
+    setValues((current) => ({ ...current, rounds: current.rounds.filter((round) => round.key !== key) }))
+  }
+
   const character = lookups.characters.find((item) => String(item.id) === values.characterId)
   // Hidden rounds remain in the form when switching back but are not saved
   const showRounds = values.kind === 'Grappling' && character?.allowsRounds === true
@@ -225,7 +236,14 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
       )}
 
       {showRounds ? (
-        <RoundsSection lookups={lookups} rounds={values.rounds} onAdd={addRound} />
+        <RoundsSection
+          lookups={lookups}
+          disciplineId={values.disciplineId}
+          rounds={values.rounds}
+          onAdd={addRound}
+          onUpdate={updateRound}
+          onRemove={removeRound}
+        />
       ) : (
         values.rounds.length > 0 && (
           <p className="sessions-muted" role="status">
