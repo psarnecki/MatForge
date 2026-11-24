@@ -182,6 +182,8 @@ export const texts = {
     roundsHidden: (count: number, characters: string) =>
       `${count === 1 ? '1 round' : `${count} rounds`} will not be saved. To keep ${count === 1 ? 'it' : 'them'}, choose a grappling session with one of these characters: ${characters}.`,
     roundError: (round: number, message: string) => `Round ${round}: ${message}`,
+    // Screen reader label for an invalid round chip
+    roundChipInvalid: (chip: string) => `${chip}, has an error`,
     deleteSession: 'Delete session',
     deleteSessionQuestion: (date: Date) => `Delete the session of ${dayTitle(date)}? This cannot be undone.`,
     sessionDeleted: 'Session deleted',

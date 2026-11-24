@@ -444,6 +444,13 @@
   border-color: var(--text);
 }
 
+/* Highlights a round with a server error */
+.sessions-chip-invalid,
+.sessions-chip-invalid:hover {
+  padding: 5px 11px;
+  border: 2px solid var(--brand);
+}
+
 .sessions-chip-marker {
   flex: none;
   width: 8px;

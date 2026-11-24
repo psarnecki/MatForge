@@ -3,7 +3,7 @@ import { Dialog } from '../../components/Dialog'
 import { texts } from '../../texts'
 import type { LookupsDto, RoundResult } from '../../types'
 import { RoundEditor } from './RoundEditor'
-import type { RoundValues } from './rounds'
+import type { RoundErrors, RoundValues } from './rounds'
 
 const maxRounds = 50
 const results: RoundResult[] = ['Win', 'Loss', 'Draw']
@@ -13,13 +13,15 @@ interface RoundsSectionProps {
   disciplineId: string
   rounds: RoundValues[]
   notice: string | null
+  // Stores server errors by round key until the next save
+  errors: Record<number, RoundErrors>
   onAdd: (result: RoundResult) => void
   onUpdate: (key: number, patch: Partial<RoundValues>) => void
   onRemove: (key: number) => void
 }
 
 // One tap adds a round and the chips show their order
-export function RoundsSection({ lookups, disciplineId, rounds, notice, onAdd, onUpdate, onRemove }: RoundsSectionProps) {
+export function RoundsSection({ lookups, disciplineId, rounds, notice, errors, onAdd, onUpdate, onRemove }: RoundsSectionProps) {
   const [editingKey, setEditingKey] = useState<number | null>(null)
   const winRef = useRef<HTMLButtonElement>(null)
   const removed = useRef(false)
@@ -74,11 +76,19 @@ export function RoundsSection({ lookups, disciplineId, rounds, notice, onAdd, on
           {rounds.map((round, index) => {
             // Win and Loss are colored only when a technique is selected
             const marked = round.result !== 'Draw' && round.techniqueId !== ''
+            const invalid = errors[round.key] !== undefined
+            const text = texts.sessions.roundChip(index + 1, texts.sessions.results[round.result], techniqueName(round.techniqueId))
             return (
               <li key={round.key}>
-                <button type="button" className="sessions-chip" aria-haspopup="dialog" onClick={() => setEditingKey(round.key)}>
+                <button
+                  type="button"
+                  className={invalid ? 'sessions-chip sessions-chip-invalid' : 'sessions-chip'}
+                  aria-haspopup="dialog"
+                  aria-label={invalid ? texts.sessions.roundChipInvalid(text) : undefined}
+                  onClick={() => setEditingKey(round.key)}
+                >
                   {marked && <span className={`sessions-chip-marker sessions-chip-marker-${round.result.toLowerCase()}`} />}
-                  {texts.sessions.roundChip(index + 1, texts.sessions.results[round.result], techniqueName(round.techniqueId))}
+                  {text}
                 </button>
               </li>
             )
@@ -101,6 +111,7 @@ export function RoundsSection({ lookups, disciplineId, rounds, notice, onAdd, on
             lookups={lookups}
             disciplineId={disciplineId}
             round={editing}
+            errors={errors[editing.key] ?? {}}
             onChange={(patch) => onUpdate(editing.key, patch)}
             onRemove={() => remove(editing.key)}
             onDone={() => setEditingKey(null)}

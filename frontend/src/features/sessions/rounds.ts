@@ -11,6 +11,13 @@ export interface RoundValues {
   notes: string
 }
 
+// Server errors for a round's fields and other round-related issues
+export interface RoundErrors {
+  techniqueId?: string
+  positionId?: string
+  round?: string
+}
+
 export function toRoundValues(round: RoundDto, key: number): RoundValues {
   return {
     key,

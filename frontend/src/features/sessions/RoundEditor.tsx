@@ -3,7 +3,7 @@ import { Button } from '../../components/Button'
 import { Select, type SelectOption } from '../../components/Select'
 import { texts } from '../../texts'
 import type { LookupsDto, RoundResult } from '../../types'
-import { positionOptions, techniqueGroups, type RoundValues } from './rounds'
+import { positionOptions, techniqueGroups, type RoundErrors, type RoundValues } from './rounds'
 import { SegmentedControl } from './SegmentedControl'
 
 const notesMaxLength = 500
@@ -13,13 +13,14 @@ interface RoundEditorProps {
   lookups: LookupsDto
   disciplineId: string
   round: RoundValues
+  errors: RoundErrors
   onChange: (patch: Partial<RoundValues>) => void
   onRemove: () => void
   onDone: () => void
 }
 
 // Changes are applied immediately and preserved when the dialog closes
-export function RoundEditor({ lookups, disciplineId, round, onChange, onRemove, onDone }: RoundEditorProps) {
+export function RoundEditor({ lookups, disciplineId, round, errors, onChange, onRemove, onDone }: RoundEditorProps) {
   const notesId = useId()
   const groups = techniqueGroups(lookups, disciplineId)
   const positions = positionOptions(lookups, disciplineId)
@@ -42,8 +43,15 @@ export function RoundEditor({ lookups, disciplineId, round, onChange, onRemove, 
     onChange(techniqueId ? { techniqueId } : { techniqueId: '', positionId: '' })
   }
 
+  // Shows errors for hidden fields at the top when the result is a draw
+  const draw = round.result === 'Draw'
+  const topErrors = [errors.round, draw ? errors.techniqueId : undefined, draw ? errors.positionId : undefined]
+    .filter((message) => message !== undefined)
+    .join('\n')
+
   return (
     <div className="sessions-sheet-body">
+      {topErrors && <p className="sessions-error">{topErrors}</p>}
       <SegmentedControl
         label={texts.sessions.result}
         options={results.map((result) => ({ value: result, label: texts.sessions.results[result] }))}
@@ -51,7 +59,7 @@ export function RoundEditor({ lookups, disciplineId, round, onChange, onRemove, 
         onChange={changeResult}
       />
 
-      {round.result !== 'Draw' && (
+      {!draw && (
         <>
           {!disciplineId && <p className="sessions-muted">{texts.sessions.chooseDisciplineFirst}</p>}
           <Select
@@ -63,6 +71,7 @@ export function RoundEditor({ lookups, disciplineId, round, onChange, onRemove, 
             ]}
             groups={groups}
             onChange={changeTechnique}
+            error={errors.techniqueId}
             disabled={!disciplineId}
           />
           <Select
@@ -74,6 +83,7 @@ export function RoundEditor({ lookups, disciplineId, round, onChange, onRemove, 
               ...positions,
             ]}
             onChange={(positionId) => onChange({ positionId })}
+            error={errors.positionId}
             disabled={!disciplineId || !round.techniqueId}
           />
         </>
