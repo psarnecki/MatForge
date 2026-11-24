@@ -6,9 +6,10 @@ import { Field } from '../../components/Field'
 import { Select, type SelectOption } from '../../components/Select'
 import { useToast } from '../../components/useToast'
 import { texts } from '../../texts'
-import type { ClubDto, LookupsDto, SessionDto, SessionKind, SessionRequest } from '../../types'
+import type { ClubDto, LookupsDto, RoundResult, SessionDto, SessionKind, SessionRequest } from '../../types'
 import { saveLastSession } from './lastSession'
 import { toRoundRequest, type RoundValues } from './rounds'
+import { RoundsSection } from './RoundsSection'
 import { SegmentedControl } from './SegmentedControl'
 
 // Form values (also ids and numbers) as text, with empty strings for unselected fields
@@ -56,6 +57,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const nextRoundKey = useRef(initialValues.rounds.length)
   const notesId = useId()
   const navigate = useNavigate()
   const showToast = useToast()
@@ -80,12 +82,21 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
     change({ disciplineId, formatId: formats.length === 1 ? String(formats[0].id) : '' })
   }
 
+  function addRound(result: RoundResult) {
+    const round: RoundValues = { key: nextRoundKey.current++, result, techniqueId: '', positionId: '', notes: '' }
+    setValues((current) => ({ ...current, rounds: [...current.rounds, round] }))
+  }
+
+  const character = lookups.characters.find((item) => String(item.id) === values.characterId)
+  // Hidden rounds remain in the form when switching back but are not saved
+  const showRounds = values.kind === 'Grappling' && character?.allowsRounds === true
+
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setFieldErrors({})
     setFormError(null)
     setSaving(true)
-    const request = toRequest(values)
+    const request = toRequest(values, showRounds)
     try {
       const saved = sessionId
         ? await apiFetch<SessionDto>(`/sessions/${sessionId}`, { method: 'PUT', body: request })
@@ -103,8 +114,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
       navigate(`/training?day=${saved.date}`)
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 400) {
-        const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
-        const errors = readErrors(caught.errors, request, texts.sessions.roundsKept(values.rounds.length,roundCharacters.join(', ')))
+        const errors = readErrors(caught.errors, request)
         setFieldErrors(errors.fields)
         setFormError(errors.form)
       } else {
@@ -118,6 +128,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
   const choose: SelectOption = { value: '', label: texts.sessions.choose }
   const options = (items: { id: number; name: string }[]) => items.map((item) => ({ value: String(item.id), label: item.name }))
   const discipline = lookups.disciplines.find((item) => String(item.id) === values.disciplineId)
+  const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
 
   return (
     <form ref={formRef} className="sessions-form" onSubmit={handleSubmit}>
@@ -213,6 +224,16 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
         />
       )}
 
+      {showRounds ? (
+        <RoundsSection lookups={lookups} rounds={values.rounds} onAdd={addRound} />
+      ) : (
+        values.rounds.length > 0 && (
+          <p className="sessions-muted" role="status">
+            {texts.sessions.roundsHidden(values.rounds.length, roundCharacters.join(', '))}
+          </p>
+        )
+      )}
+
       {/* Inline layout, as notes are the only multi-line field */}
       <div className="field">
         <label htmlFor={notesId}>{texts.sessions.notes}</label>
@@ -255,8 +276,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
 }
 
 // Switching kinds preserves the form values, but inactive fields are sent as null
-// Rounds are always sent so the server can validate them against the selected kind and character
-function toRequest(values: SessionFormValues): SessionRequest {
+function toRequest(values: SessionFormValues, withRounds: boolean): SessionRequest {
   const grappling = values.kind === 'Grappling'
   const id = (text: string) => (text ? Number(text) : null)
   return {
@@ -271,13 +291,13 @@ function toRequest(values: SessionFormValues): SessionRequest {
     characterId: grappling ? id(values.characterId) : null,
     clubId: grappling ? id(values.clubId) : null,
     activityTypeId: grappling ? null : id(values.activityTypeId),
-    rounds: values.rounds.map(toRoundRequest),
+    rounds: withRounds ? values.rounds.map(toRoundRequest) : [],
   }
 }
 
 // Maps server validation errors to form messages
 // Round and unknown field errors are shown above Save
-function readErrors(serverErrors: Record<string, string[]>, request: SessionRequest, roundsHint: string) {
+function readErrors(serverErrors: Record<string, string[]>, request: SessionRequest) {
   const fields: FieldErrors = {}
   const form = new Set<string>()
   for (const [key, messages] of Object.entries(serverErrors)) {
@@ -291,7 +311,7 @@ function readErrors(serverErrors: Record<string, string[]>, request: SessionRequ
     } else if (isFieldKey(key)) {
       fields[key] = messages[0]
     } else if (key === 'rounds') {
-      form.add(`${messages[0]} ${roundsHint}`)
+      form.add(messages[0])
     } else if (round) {
       form.add(texts.sessions.roundError(Number(round[1]) + 1, messages[0]))
     } else {
