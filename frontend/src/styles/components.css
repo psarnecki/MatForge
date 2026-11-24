@@ -73,6 +73,11 @@
   font-weight: 500;
 }
 
+.field select:disabled {
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
 .field [aria-invalid='true'] {
   border-color: var(--brand);
 }
