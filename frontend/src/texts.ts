@@ -34,6 +34,7 @@ export const texts = {
     close: 'Close',
     loading: 'Loading',
     cancel: 'Cancel',
+    done: 'Done',
   },
   errors: {
     unexpected: 'Something went wrong. Try again.',
@@ -156,10 +157,33 @@ export const texts = {
     saveSession: 'Save session',
     sessionSaved: 'Session saved',
     notFound: 'Session not found.',
-    // Shown after the server error when existing rounds do not match the selected character
-    roundsKept: (count: number, characters: string) =>
-      `This session has ${count === 1 ? '1 round' : `${count} rounds`}, which need one of these characters: ${characters}.`,
+    rounds: 'Rounds',
+    addRound: 'Add a round',
+    results: { Win: 'Win', Loss: 'Loss', Draw: 'Draw' },
+    roundChip: (number: number, result: string, technique: string | null) =>
+      technique ? `${number} ${result}, ${technique}` : `${number} ${result}`,
+    roundsSummary: (wins: number, losses: number, draws: number) => {
+      const count = wins + losses + draws
+      return `${count === 1 ? '1 round' : `${count} rounds`}: ${wins} W, ${losses} L, ${draws} D`
+    },
+    roundsLimit: (max: number) => `A session can have at most ${max} rounds.`,
+    // Notice shown after a discipline change when rounds are affected
+    roundsCleared: (discipline: string, rounds: number[]) =>
+      `${rounds.length === 1 ? 'Round' : 'Rounds'} ${rounds.join(', ')}: cleared the technique or position that is not available for ${discipline}.`,
+    roundTitle: (number: number) => `Round ${number}`,
+    result: 'Result',
+    technique: 'Technique (optional)',
+    position: 'Position (optional)',
+    noTechnique: 'None',
+    noPosition: 'None',
+    chooseDisciplineFirst: 'Choose a discipline to add a technique and position.',
+    removeRound: 'Remove round',
+    // Shown instead of the rounds section when the kind or character has no rounds
+    roundsHidden: (count: number, characters: string) =>
+      `${count === 1 ? '1 round' : `${count} rounds`} will not be saved. To keep ${count === 1 ? 'it' : 'them'}, choose a grappling session with one of these characters: ${characters}.`,
     roundError: (round: number, message: string) => `Round ${round}: ${message}`,
+    // Screen reader label for an invalid round chip
+    roundChipInvalid: (chip: string) => `${chip}, has an error`,
     deleteSession: 'Delete session',
     deleteSessionQuestion: (date: Date) => `Delete the session of ${dayTitle(date)}? This cannot be undone.`,
     sessionDeleted: 'Session deleted',

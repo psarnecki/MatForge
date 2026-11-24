@@ -6,10 +6,12 @@ interface DialogProps {
   title: string
   onClose: () => void
   children: ReactNode
+  // Additional class for a custom layout
+  className?: string
 }
 
-// Native <dialog>: focus trap, Escape and the backdrop come from the browser
-export function Dialog({ open, title, onClose, children }: DialogProps) {
+// Native dialog handles focus, Escape and backdrop behavior
+export function Dialog({ open, title, onClose, children, className }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
 
@@ -27,7 +29,7 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
   }, [open])
 
   return (
-    <dialog ref={ref} className="dialog" aria-labelledby={titleId} onClose={onClose}>
+    <dialog ref={ref} className={className ? `dialog ${className}` : 'dialog'} aria-labelledby={titleId} onClose={onClose}>
       <div className="dialog-header">
         <h2 id={titleId}>{title}</h2>
         <button type="button" className="icon-button" aria-label={texts.common.close} onClick={onClose}>

@@ -6,8 +6,10 @@ import { Field } from '../../components/Field'
 import { Select, type SelectOption } from '../../components/Select'
 import { useToast } from '../../components/useToast'
 import { texts } from '../../texts'
-import type { ClubDto, LookupsDto, RoundRequest, SessionDto, SessionKind, SessionRequest } from '../../types'
+import type { ClubDto, LookupsDto, RoundResult, SessionDto, SessionKind, SessionRequest } from '../../types'
 import { saveLastSession } from './lastSession'
+import { clearNotOffered, toRoundRequest, type RoundErrors, type RoundValues } from './rounds'
+import { RoundsSection } from './RoundsSection'
 import { SegmentedControl } from './SegmentedControl'
 
 // Form values (also ids and numbers) as text, with empty strings for unselected fields
@@ -22,6 +24,8 @@ export interface SessionFormValues {
   clubId: string
   activityTypeId: string
   notes: string
+  // In the order they are saved
+  rounds: RoundValues[]
 }
 
 // Request fields whose server errors are shown under their input
@@ -43,18 +47,21 @@ interface SessionFormProps {
   initialValues: SessionFormValues
   // Set when editing
   sessionId?: number
-  // Rounds for the session
-  rounds: RoundRequest[]
   // Provided when editing to show the Delete session button
   onDelete?: () => void
 }
 
-export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, onDelete }: SessionFormProps) {
+export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete }: SessionFormProps) {
   const [values, setValues] = useState(initialValues)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
+  // Keeps errors attached to the correct round when another is removed
+  const [roundErrors, setRoundErrors] = useState<Record<number, RoundErrors>>({})
   const [saving, setSaving] = useState(false)
+  // Tracks rounds affected by the last discipline change until the next change
+  const [clearedNotice, setClearedNotice] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const nextRoundKey = useRef(initialValues.rounds.length)
   const notesId = useId()
   const navigate = useNavigate()
   const showToast = useToast()
@@ -67,24 +74,54 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
     } else {
       formRef.current?.querySelector('.sessions-error')?.scrollIntoView({ block: 'center' })
     }
-  }, [fieldErrors, formError])
+  }, [fieldErrors, formError, roundErrors])
 
   function change(patch: Partial<SessionFormValues>) {
     setValues((current) => ({ ...current, ...patch }))
   }
 
   // Formats depend on the discipline, with a single format selected automatically
+  // Clears techniques and positions not offered in the selected discipline (none when no discipline is chosen)
   function changeDiscipline(disciplineId: string) {
-    const formats = lookups.disciplines.find((item) => String(item.id) === disciplineId)?.formats ?? []
-    change({ disciplineId, formatId: formats.length === 1 ? String(formats[0].id) : '' })
+    const discipline = lookups.disciplines.find((item) => String(item.id) === disciplineId)
+    const formats = discipline?.formats ?? []
+    const { rounds, cleared } = discipline
+      ? clearNotOffered(values.rounds, lookups, disciplineId)
+      : { rounds: values.rounds, cleared: [] }
+    change({ disciplineId, formatId: formats.length === 1 ? String(formats[0].id) : '', rounds })
+    setClearedNotice(discipline && cleared.length > 0 ? texts.sessions.roundsCleared(discipline.name, cleared) : null)
   }
+
+  function addRound(result: RoundResult) {
+    const round: RoundValues = { key: nextRoundKey.current++, result, techniqueId: '', positionId: '', notes: '' }
+    setValues((current) => ({ ...current, rounds: [...current.rounds, round] }))
+    setClearedNotice(null)
+  }
+
+  function updateRound(key: number, patch: Partial<RoundValues>) {
+    setClearedNotice(null)
+    setValues((current) => ({
+      ...current,
+      rounds: current.rounds.map((round) => (round.key === key ? { ...round, ...patch } : round)),
+    }))
+  }
+
+  function removeRound(key: number) {
+    setClearedNotice(null)
+    setValues((current) => ({ ...current, rounds: current.rounds.filter((round) => round.key !== key) }))
+  }
+
+  const character = lookups.characters.find((item) => String(item.id) === values.characterId)
+  // Hidden rounds remain in the form when switching back but are not saved
+  const showRounds = values.kind === 'Grappling' && character?.allowsRounds === true
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setFieldErrors({})
     setFormError(null)
+    setRoundErrors({})
     setSaving(true)
-    const request = toRequest(values, rounds)
+    const request = toRequest(values, showRounds)
     try {
       const saved = sessionId
         ? await apiFetch<SessionDto>(`/sessions/${sessionId}`, { method: 'PUT', body: request })
@@ -102,10 +139,12 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
       navigate(`/training?day=${saved.date}`)
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 400) {
-        const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
-        const errors = readErrors(caught.errors, request, texts.sessions.roundsKept(rounds.length, roundCharacters.join(', ')))
+        // Request rounds follow form order, so each index maps to its round key
+        const roundKeys = showRounds ? values.rounds.map((round) => round.key) : []
+        const errors = readErrors(caught.errors, request, roundKeys)
         setFieldErrors(errors.fields)
         setFormError(errors.form)
+        setRoundErrors(errors.rounds)
       } else {
         showToast(errorMessage(caught), 'error')
       }
@@ -117,6 +156,17 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
   const choose: SelectOption = { value: '', label: texts.sessions.choose }
   const options = (items: { id: number; name: string }[]) => items.map((item) => ({ value: String(item.id), label: item.name }))
   const discipline = lookups.disciplines.find((item) => String(item.id) === values.disciplineId)
+  const roundCharacters = lookups.characters.filter((item) => item.allowsRounds).map((item) => item.name)
+  // Shows one error line per invalid round in the current order
+  const roundErrorLines = showRounds
+    ? values.rounds.flatMap((round, index) => {
+        const errors = roundErrors[round.key] ?? {}
+        return [errors.round, errors.techniqueId, errors.positionId]
+          .filter((message) => message !== undefined)
+          .map((message) => texts.sessions.roundError(index + 1, message))
+      })
+    : []
+  const errorText = [...roundErrorLines, formError].filter((line) => line !== null).join('\n')
 
   return (
     <form ref={formRef} className="sessions-form" onSubmit={handleSubmit}>
@@ -212,6 +262,25 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
         />
       )}
 
+      {showRounds ? (
+        <RoundsSection
+          lookups={lookups}
+          disciplineId={values.disciplineId}
+          rounds={values.rounds}
+          notice={clearedNotice}
+          errors={roundErrors}
+          onAdd={addRound}
+          onUpdate={updateRound}
+          onRemove={removeRound}
+        />
+      ) : (
+        values.rounds.length > 0 && (
+          <p className="sessions-muted" role="status">
+            {texts.sessions.roundsHidden(values.rounds.length, roundCharacters.join(', '))}
+          </p>
+        )
+      )}
+
       {/* Inline layout, as notes are the only multi-line field */}
       <div className="field">
         <label htmlFor={notesId}>{texts.sessions.notes}</label>
@@ -232,9 +301,9 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
         )}
       </div>
 
-      {formError && (
+      {errorText && (
         <p className="sessions-error" role="alert">
-          {formError}
+          {errorText}
         </p>
       )}
       <div className="sessions-actions">
@@ -254,8 +323,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, rounds, 
 }
 
 // Switching kinds preserves the form values, but inactive fields are sent as null
-// Rounds are always sent so the server can validate them against the selected kind and character
-function toRequest(values: SessionFormValues, rounds: RoundRequest[]): SessionRequest {
+function toRequest(values: SessionFormValues, withRounds: boolean): SessionRequest {
   const grappling = values.kind === 'Grappling'
   const id = (text: string) => (text ? Number(text) : null)
   return {
@@ -270,17 +338,19 @@ function toRequest(values: SessionFormValues, rounds: RoundRequest[]): SessionRe
     characterId: grappling ? id(values.characterId) : null,
     clubId: grappling ? id(values.clubId) : null,
     activityTypeId: grappling ? null : id(values.activityTypeId),
-    rounds,
+    rounds: withRounds ? values.rounds.map(toRoundRequest) : [],
   }
 }
 
 // Maps server validation errors to form messages
-// Round and unknown field errors are shown above Save
-function readErrors(serverErrors: Record<string, string[]>, request: SessionRequest, roundsHint: string) {
+// Round errors are shown with their round, other errors above Save
+function readErrors(serverErrors: Record<string, string[]>, request: SessionRequest, roundKeys: number[]) {
   const fields: FieldErrors = {}
   const form = new Set<string>()
+  const rounds: Record<number, RoundErrors> = {}
   for (const [key, messages] of Object.entries(serverErrors)) {
-    const round = /^rounds\[(\d+)\]/.exec(key)
+    const round = /^rounds\[(\d+)\](?:\.(\w+))?$/.exec(key)
+    const roundKey = round ? roundKeys[Number(round[1])] : undefined
     if (key === 'durationMinutes') {
       fields.durationMinutes = texts.sessions.durationInvalid
     } else if (key === 'feeling') {
@@ -290,12 +360,13 @@ function readErrors(serverErrors: Record<string, string[]>, request: SessionRequ
     } else if (isFieldKey(key)) {
       fields[key] = messages[0]
     } else if (key === 'rounds') {
-      form.add(`${messages[0]} ${roundsHint}`)
-    } else if (round) {
-      form.add(texts.sessions.roundError(Number(round[1]) + 1, messages[0]))
+      form.add(messages[0])
+    } else if (round && roundKey !== undefined) {
+      const field = round[2] === 'techniqueId' || round[2] === 'positionId' ? round[2] : 'round'
+      rounds[roundKey] = { ...rounds[roundKey], [field]: messages[0] }
     } else {
       form.add(texts.errors.unexpected)
     }
   }
-  return { fields, form: form.size > 0 ? [...form].join('\n') : null }
+  return { fields, form: form.size > 0 ? [...form].join('\n') : null, rounds }
 }

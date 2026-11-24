@@ -8,6 +8,7 @@ import { texts } from '../../texts'
 import type { ClubDto, LookupsDto, SessionDto } from '../../types'
 import { DeleteSessionForm } from './DeleteSessionForm'
 import { readLastSession } from './lastSession'
+import { toRoundValues } from './rounds'
 import { SessionForm, type SessionFormValues } from './SessionForm'
 
 interface Loaded {
@@ -72,7 +73,6 @@ export function SessionFormPage() {
             lookups={lookups}
             clubs={loaded.clubs}
             sessionId={session?.id}
-            rounds={session?.rounds ?? []}
             initialValues={session ? sessionValues(session) : newSessionValues(lookups, loaded.clubs, newDate)}
             onDelete={session ? () => setDeleteOpen(true) : undefined}
           />
@@ -108,6 +108,7 @@ function newSessionValues(lookups: LookupsDto, clubs: ClubDto[], date: string): 
     clubId: idText(club),
     activityTypeId: '',
     notes: '',
+    rounds: [],
   }
 }
 
@@ -124,5 +125,6 @@ function sessionValues(session: SessionDto): SessionFormValues {
     clubId: idText(session.clubId),
     activityTypeId: idText(session.activityTypeId),
     notes: session.notes ?? '',
+    rounds: session.rounds.map(toRoundValues),
   }
 }
