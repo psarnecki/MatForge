@@ -48,7 +48,7 @@ export function RoundsSection({ lookups, disciplineId, rounds, notice, errors, o
 
   return (
     <div>
-      <span id={labelId} className="sessions-label">
+      <span id={labelId} className="field-label">
         {texts.sessions.rounds}
       </span>
       <div role="group" className="sessions-results" aria-label={texts.sessions.addRound}>
@@ -103,7 +103,7 @@ export function RoundsSection({ lookups, disciplineId, rounds, notice, errors, o
       <Dialog
         open={editing !== null}
         title={texts.sessions.roundTitle(editingIndex + 1)}
-        className="sessions-sheet"
+        className="dialog-sheet"
         onClose={closeEditor}
       >
         {editing && (

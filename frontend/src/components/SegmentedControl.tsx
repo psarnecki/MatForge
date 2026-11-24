@@ -19,13 +19,13 @@ export function SegmentedControl<T extends string>({ label, hideLabel, options, 
   return (
     <div className="field">
       {!hideLabel && (
-        <span id={labelId} className="sessions-label">
+        <span id={labelId} className="field-label">
           {label}
         </span>
       )}
       <div
         role="group"
-        className="sessions-segments"
+        className="segments"
         aria-label={hideLabel ? label : undefined}
         aria-labelledby={hideLabel ? undefined : labelId}
         aria-describedby={error ? errorId : undefined}

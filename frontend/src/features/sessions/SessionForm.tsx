@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { ApiError, apiFetch, errorMessage } from '../../api/apiFetch'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
+import { SegmentedControl } from '../../components/SegmentedControl'
 import { Select, type SelectOption } from '../../components/Select'
 import { useToast } from '../../components/useToast'
 import { texts } from '../../texts'
@@ -10,7 +11,6 @@ import type { ClubDto, LookupsDto, RoundResult, SessionDto, SessionKind, Session
 import { saveLastSession } from './lastSession'
 import { clearNotOffered, toRoundRequest, type RoundErrors, type RoundValues } from './rounds'
 import { RoundsSection } from './RoundsSection'
-import { SegmentedControl } from './SegmentedControl'
 
 // Form values (also ids and numbers) as text, with empty strings for unselected fields
 export interface SessionFormValues {
@@ -199,7 +199,7 @@ export function SessionForm({ lookups, clubs, initialValues, sessionId, onDelete
             error={fieldErrors.durationMinutes}
             required
           />
-          <div role="group" className="sessions-segments sessions-quick" aria-label={texts.sessions.quickDuration}>
+          <div role="group" className="segments sessions-quick" aria-label={texts.sessions.quickDuration}>
             {quickDurations.map((minutes) => (
               <button key={minutes} type="button" aria-pressed={values.duration === minutes} onClick={() => change({ duration: minutes })}>
                 {minutes}

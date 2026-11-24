@@ -1,4 +1,5 @@
-import type { SelectGroup, SelectOption } from '../../components/Select'
+import type { SelectOption } from '../../components/Select'
+import { techniqueGroups } from '../../lib/techniques'
 import type { LookupsDto, RoundDto, RoundRequest, RoundResult } from '../../types'
 
 // Editable round with ids and notes treated as text values
@@ -35,19 +36,6 @@ export function toRoundRequest(round: RoundValues): RoundRequest {
     positionId: round.positionId ? Number(round.positionId) : null,
     notes: round.notes.trim() || null,
   }
-}
-
-// Groups techniques by category for the selected discipline
-export function techniqueGroups(lookups: LookupsDto, disciplineId: string): SelectGroup[] {
-  return lookups.techniqueCategories
-    .filter((category) => category.disciplineIds.includes(Number(disciplineId)))
-    .map((category) => ({
-      label: category.name,
-      options: lookups.techniques
-        .filter((technique) => technique.categoryId === category.id)
-        .map((technique) => ({ value: String(technique.id), label: technique.name })),
-    }))
-    .filter((group) => group.options.length > 0)
 }
 
 // Returns positions available in the selected discipline
