@@ -3,6 +3,13 @@ using MatForge.Data.Enums;
 
 namespace MatForge.Application.Features.Analytics;
 
+// Both dates are optional, the service fills in any missing dates
+public class AnalyticsQuery
+{
+    public DateOnly? From { get; init; }
+    public DateOnly? To { get; init; }
+}
+
 public record OverviewDto(
     PeriodDto Period,
     SessionTotalsDto Sessions,
