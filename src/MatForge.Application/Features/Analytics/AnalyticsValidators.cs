@@ -53,3 +53,12 @@ public class AnalyticsQueryValidator : AbstractValidator<AnalyticsQuery>
 
     private static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 }
+
+// Uses the same period rules, while filters are not validated yet
+public class AnalyticsFilterQueryValidator : AbstractValidator<AnalyticsFilterQuery>
+{
+    public AnalyticsFilterQueryValidator()
+    {
+        Include(new AnalyticsQueryValidator());
+    }
+}

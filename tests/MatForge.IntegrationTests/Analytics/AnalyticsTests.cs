@@ -7,11 +7,15 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using FluentAssertions;
 using MatForge.Application.Features.Analytics;
+using MatForge.Application.Features.Analytics.Calculators;
 using MatForge.Application.Features.Clubs;
 using MatForge.Data.Enums;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace MatForge.IntegrationTests.Analytics;
 
@@ -201,6 +205,180 @@ public class AnalyticsTests(DatabaseFixture fixture)
         withoutFrom.Should().Be(2);
     }
 
+    [Fact]
+    public async Task Sparring_returns_totals_finishes_and_trend_with_dictionary_names()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-08",
+            Round("Win", ids.Armbar, ids.Mount), Round("Win", ids.Armbar), Round("Loss", ids.Rnc, ids.BackControl), Round("Draw")));
+
+        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+
+        sparring.Totals.Should().Be(new RoundTotalsDto(4, 2, 1, 1, 0.5m, 1));
+        sparring.FinishesFor.Total.Should().Be(2);
+        sparring.FinishesFor.ByTechnique.Should().Equal(new FinishGroupDto(ids.Armbar, "Armbar", 2, 1m));
+        sparring.FinishesFor.ByCategory.Should().Equal(new FinishGroupDto(ids.ArmLock, "Arm Lock", 2, 1m));
+        sparring.FinishesFor.ByPosition.Recorded.Should().Be(1);
+        sparring.FinishesFor.ByPosition.Items.Should().Equal(new FinishGroupDto(ids.Mount, "Mount", 1, 1m));
+        sparring.FinishesAgainst.Total.Should().Be(1);
+        sparring.FinishesAgainst.ByTechnique.Should().Equal(new FinishGroupDto(ids.Rnc, "Rear Naked Choke", 1, 1m));
+        sparring.FinishesAgainst.ByCategory.Should().Equal(new FinishGroupDto(ids.Choke, "Choke", 1, 1m));
+        sparring.FinishesAgainst.ByPosition.Items.Should().Equal(new FinishGroupDto(ids.BackControl, "Back Control", 1, 1m));
+        sparring.Trend.Bucket.Should().Be(Bucket.Week);
+        sparring.Trend.Points.Should().HaveCount(5);
+        sparring.Trend.Points[1].Should().Be(new TrendPointDto(new DateOnly(2026, 9, 7), 4, 2, 1, 1, 0.5m));
+        sparring.Trend.Previous.Should().Be(new PreviousPeriodDto(0, null));
+        sparring.Trend.WinRateDelta.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Sparring_json_uses_strings_for_the_bucket_and_null_for_empty_rates()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-08", Round("Win", ids.Armbar, ids.Mount), Round("Loss")));
+
+        var json = await GetJsonAsync(user, "/api/analytics/sparring?from=2026-09-01&to=2026-09-30");
+
+        json["totals"]!["winRate"]!.GetValue<decimal>().Should().Be(0.5m);
+        json["finishesFor"]!["byPosition"]!["recorded"]!.GetValue<int>().Should().Be(1);
+        json["trend"]!["bucket"]!.GetValue<string>().Should().Be("Week");
+        json["trend"]!["points"]![0]!["start"]!.GetValue<string>().Should().Be("2026-08-31");
+        json["trend"]!["points"]![0]!.AsObject().Select(p => p.Key).Should().Contain("winRate");
+        json["trend"]!["points"]![0]!["winRate"].Should().BeNull();
+        json["trend"]!["winRateDelta"].Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Sparring_without_rounds_returns_zeros_and_nulls()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-08"));
+        await CreateSessionAsync(user, Other(ids, "2026-09-09"));
+
+        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+
+        sparring.Totals.Should().Be(new RoundTotalsDto(0, 0, 0, 0, null, 0));
+        sparring.FinishesFor.Should().BeEquivalentTo(new FinishesDto(0, [], [], new PositionFinishesDto(0, [])));
+        sparring.FinishesAgainst.Should().BeEquivalentTo(new FinishesDto(0, [], [], new PositionFinishesDto(0, [])));
+        sparring.Trend.Points.Should().HaveCount(5).And.OnlyContain(p => p.Rounds == 0 && p.WinRate == null);
+        sparring.Trend.Previous.Should().Be(new PreviousPeriodDto(0, null));
+        sparring.Trend.WinRateDelta.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Sparring_counts_rounds_by_the_date_of_their_session()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-08-31", Round("Loss")));
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-30", Round("Win")));
+        await CreateSessionAsync(user, Sparring(ids, "2026-10-01", Round("Loss"), Round("Loss")));
+
+        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+
+        sparring.Totals.Should().Be(new RoundTotalsDto(1, 1, 0, 0, 1m, 1));
+        sparring.Trend.Previous.Should().Be(new PreviousPeriodDto(1, 0m));
+    }
+
+    [Fact]
+    public async Task Sparring_compares_with_the_previous_period()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-15", Rounds(6, 4)));
+        await CreateSessionAsync(user, Sparring(ids, "2026-08-15", Rounds(4, 6)));
+
+        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+
+        sparring.Totals.WinRate.Should().Be(0.6m);
+        sparring.Trend.Previous.Should().Be(new PreviousPeriodDto(10, 0.4m));
+        sparring.Trend.WinRateDelta.Should().Be(0.2m);
+    }
+
+    [Fact]
+    public async Task Sparring_filters_both_periods_by_discipline_and_format()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Round("Win"), Round("Win")));
+        await CreateSessionAsync(user, Grappling(ids, "2026-09-11", ids.NoGi, null, rounds: [Round("Loss")]));
+        await CreateSessionAsync(user, Grappling(ids, "2026-09-12", ids.Freestyle, null, rounds: [Round("Draw")],
+            disciplineId: ids.Wrestling));
+        await CreateSessionAsync(user, Sparring(ids, "2026-08-20", Round("Win")));
+        await CreateSessionAsync(user, Grappling(ids, "2026-08-21", ids.Freestyle, null, rounds: [Round("Loss")],
+            disciplineId: ids.Wrestling));
+
+        async Task<(int Current, int Previous)> RoundsAsync(string filters)
+        {
+            var sparring = await GetSparringAsync(user, $"from=2026-09-01&to=2026-09-30{filters}");
+            return (sparring.Totals.Rounds, sparring.Trend.Previous.Rounds);
+        }
+
+        (await RoundsAsync("")).Should().Be((4, 2));
+        (await RoundsAsync($"&disciplineId={ids.Bjj}")).Should().Be((3, 1));
+        (await RoundsAsync($"&disciplineId={ids.Bjj}&formatId={ids.NoGi}")).Should().Be((1, 0));
+        (await RoundsAsync($"&formatId={ids.Freestyle}")).Should().Be((1, 1));
+        (await RoundsAsync($"&disciplineId={ids.Bjj}&formatId={ids.Freestyle}")).Should().Be((0, 0));
+    }
+
+    [Fact]
+    public async Task Sparring_ignores_another_users_rounds()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var otherUser = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Round("Win")));
+        await CreateSessionAsync(otherUser, Sparring(ids, "2026-09-10", Round("Loss"), Round("Loss")));
+        await CreateSessionAsync(otherUser, Sparring(ids, "2026-08-10", Round("Loss")));
+
+        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+
+        sparring.Totals.Should().Be(new RoundTotalsDto(1, 1, 0, 0, 1m, 1));
+        sparring.Trend.Previous.Rounds.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Sparring_runs_one_query_and_one_more_without_from()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Round("Win", ids.Armbar, ids.Mount), Round("Loss")));
+        await CreateSessionAsync(user, Sparring(ids, "2026-08-10", Round("Draw")));
+
+        var withFrom = await CountQueriesAsync(user.Id, service => service.GetSparringAsync(
+            new AnalyticsFilterQuery { From = new DateOnly(2026, 9, 1), To = new DateOnly(2026, 9, 30), DisciplineId = ids.Bjj },
+            CancellationToken.None));
+        var withoutFrom = await CountQueriesAsync(user.Id, service => service.GetSparringAsync(
+            new AnalyticsFilterQuery(), CancellationToken.None));
+
+        withFrom.Should().Be(1);
+        withoutFrom.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task Sparring_validates_the_period_like_the_overview()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+
+        await ExpectValidationErrorAsync(
+            await user.Client.GetAsync("/api/analytics/sparring?from=2026-09-10&to=2026-09-09"), "to");
+    }
+
+    [Fact]
+    public void Api_does_not_start_when_min_samples_is_below_1()
+    {
+        using var factory = new ApiFactory(fixture.ConnectionString).WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
+                new Dictionary<string, string?> { ["Analytics:Rules:Training:MinSamples"] = "0" })));
+
+        var start = () => factory.Server;
+
+        start.Should().Throw<OptionsValidationException>().WithMessage("*MinSamples must be at least 1*");
+    }
+
     [Theory]
     [InlineData("from=1999-12-31", "from")]
     [InlineData("to=1999-12-31", "to")]
@@ -230,6 +408,7 @@ public class AnalyticsTests(DatabaseFixture fixture)
         var client = fixture.ApiFactory.CreateClient();
 
         (await client.GetAsync("/api/analytics/overview")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.GetAsync("/api/analytics/sparring")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private static async Task ExpectValidationErrorAsync(HttpResponseMessage response, string key)
@@ -241,6 +420,9 @@ public class AnalyticsTests(DatabaseFixture fixture)
     private static async Task<OverviewDto> GetOverviewAsync(LoggedInUser user, string query) =>
         (await user.Client.GetFromJsonAsync<OverviewDto>($"/api/analytics/overview?{query}", Json))!;
 
+    private static async Task<SparringDto> GetSparringAsync(LoggedInUser user, string query) =>
+        (await user.Client.GetFromJsonAsync<SparringDto>($"/api/analytics/sparring?{query}", Json))!;
+
     private static async Task<JsonNode> GetJsonAsync(LoggedInUser user, string url) =>
         JsonNode.Parse(await user.Client.GetStringAsync(url))!;
 
@@ -249,25 +431,35 @@ public class AnalyticsTests(DatabaseFixture fixture)
         var counter = new QueryCounter();
         await using var db = fixture.CreateDbContext(userId, counter);
 
-        await call(new AnalyticsService(db));
+        await call(new AnalyticsService(db,
+            Options.Create(new AnalyticsRulesOptions { Training = new RuleThresholds { MinSamples = 10 } })));
 
         return counter.Count;
     }
 
     private static object Grappling(DictionaryIds ids, string date, int formatId, int? clubId, int minutes = 90,
-        int feeling = 4) =>
+        int feeling = 4, object[]? rounds = null, int? disciplineId = null) =>
         new
         {
             kind = "Grappling",
             date,
             durationMinutes = minutes,
             feeling,
-            disciplineId = ids.Bjj,
+            disciplineId = disciplineId ?? ids.Bjj,
             formatId,
             characterId = ids.Sparring,
             clubId,
-            rounds = Array.Empty<object>()
+            rounds = rounds ?? []
         };
+
+    private static object Sparring(DictionaryIds ids, string date, params object[] rounds) =>
+        Grappling(ids, date, ids.Gi, null, rounds: rounds);
+
+    private static object Round(string result, int? techniqueId = null, int? positionId = null) =>
+        new { result, techniqueId, positionId };
+
+    private static object[] Rounds(int wins, int losses) =>
+        [..Enumerable.Repeat(Round("Win"), wins), ..Enumerable.Repeat(Round("Loss"), losses)];
 
     private static object Other(DictionaryIds ids, string date, int feeling = 4) =>
         new { kind = "Other", date, durationMinutes = 45, feeling, activityTypeId = ids.Running };
@@ -302,10 +494,18 @@ public class AnalyticsTests(DatabaseFixture fixture)
         var noGi = await db.DisciplineFormats.SingleAsync(f => f.DisciplineId == bjj.Id && f.Code == "nogi");
         var sparring = await db.TrainingCharacters.SingleAsync(c => c.Code == "sparring");
         var running = await db.ActivityTypes.SingleAsync(a => a.Code == "running");
-        return new DictionaryIds(bjj.Id, gi.Id, noGi.Id, sparring.Id, running.Id);
+        var wrestling = await db.Disciplines.SingleAsync(d => d.Code == "wrestling");
+        var freestyle = await db.DisciplineFormats.SingleAsync(f => f.DisciplineId == wrestling.Id && f.Code == "freestyle");
+        var armbar = await db.Techniques.SingleAsync(t => t.Code == "armbar");
+        var rnc = await db.Techniques.SingleAsync(t => t.Code == "rear_naked_choke");
+        var mount = await db.Positions.SingleAsync(p => p.Code == "mount");
+        var backControl = await db.Positions.SingleAsync(p => p.Code == "back_control");
+        return new DictionaryIds(bjj.Id, gi.Id, noGi.Id, sparring.Id, running.Id, wrestling.Id, freestyle.Id,
+            armbar.Id, armbar.CategoryId, rnc.Id, rnc.CategoryId, mount.Id, backControl.Id);
     }
 
-    private record DictionaryIds(int Bjj, int Gi, int NoGi, int Sparring, int Running);
+    private record DictionaryIds(int Bjj, int Gi, int NoGi, int Sparring, int Running, int Wrestling, int Freestyle,
+        int Armbar, int ArmLock, int Rnc, int Choke, int Mount, int BackControl);
 
     private class QueryCounter : DbCommandInterceptor
     {

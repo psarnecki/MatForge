@@ -1,10 +1,11 @@
 using MatForge.Application.Features.Analytics.Calculators;
 using MatForge.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace MatForge.Application.Features.Analytics;
 
-public class AnalyticsService(AppDbContext db) : IAnalyticsService
+public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> options) : IAnalyticsService
 {
     // For GET /api/analytics/overview (one query loads the sessions, the calculator does the rest)
     public async Task<OverviewDto> GetOverviewAsync(AnalyticsQuery query, CancellationToken cancellationToken)
@@ -21,6 +22,34 @@ public class AnalyticsService(AppDbContext db) : IAnalyticsService
             .ToListAsync(cancellationToken);
 
         return OverviewCalculator.Calculate(period, sessions);
+    }
+
+    // For GET /api/analytics/sparring (one query loads the rounds of this and the previous period)
+    public async Task<SparringDto> GetSparringAsync(AnalyticsFilterQuery query, CancellationToken cancellationToken)
+    {
+        var period = await ResolvePeriodAsync(query, cancellationToken);
+        var start = period.Previous.From;
+        var end = period.To;
+
+        var rounds = db.SparringRounds.Where(r => r.TrainingSession.Date >= start && r.TrainingSession.Date <= end);
+        if (query.DisciplineId != null)
+        {
+            rounds = rounds.Where(r => r.TrainingSession.DisciplineId == query.DisciplineId);
+        }
+
+        if (query.FormatId != null)
+        {
+            rounds = rounds.Where(r => r.TrainingSession.FormatId == query.FormatId);
+        }
+
+        var rows = await rounds
+            .Select(r => new RoundRow(r.TrainingSession.Date, r.Result,
+                r.TechniqueId, r.Technique!.Name,
+                (int?)r.Technique.CategoryId, r.Technique.Category.Name,
+                r.PositionId, r.Position!.Name))
+            .ToListAsync(cancellationToken);
+
+        return SparringCalculator.Calculate(period, rows, options.Value.Training.MinSamples);
     }
 
     // An omitted start requires the date of the earliest session or competition (one extra query)

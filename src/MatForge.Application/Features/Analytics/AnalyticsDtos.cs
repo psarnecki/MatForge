@@ -10,6 +10,13 @@ public class AnalyticsQuery
     public DateOnly? To { get; init; }
 }
 
+// Both filters are optional and limit the data to matching grappling sessions
+public class AnalyticsFilterQuery : AnalyticsQuery
+{
+    public int? DisciplineId { get; init; }
+    public int? FormatId { get; init; }
+}
+
 public record OverviewDto(
     PeriodDto Period,
     SessionTotalsDto Sessions,

@@ -38,6 +38,10 @@ builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<ICompetitionService, CompetitionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddOptions<AnalyticsRulesOptions>()
+    .Bind(builder.Configuration.GetSection(AnalyticsRulesOptions.Section))
+    .Validate(options => options.Training.MinSamples >= 1, "Analytics:Rules:Training:MinSamples must be at least 1.")
+    .ValidateOnStart();
 
 builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
 builder.Services.AddScoped<IValidator<SessionRequest>, SessionRequestValidator>();
@@ -45,6 +49,7 @@ builder.Services.AddScoped<IValidator<SessionListQuery>, SessionListQueryValidat
 builder.Services.AddScoped<IValidator<CompetitionRequest>, CompetitionRequestValidator>();
 builder.Services.AddScoped<IValidator<CompetitionListQuery>, CompetitionListQueryValidator>();
 builder.Services.AddScoped<IValidator<AnalyticsQuery>, AnalyticsQueryValidator>();
+builder.Services.AddScoped<IValidator<AnalyticsFilterQuery>, AnalyticsFilterQueryValidator>();
 
 var app = builder.Build();
 
