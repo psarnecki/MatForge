@@ -8,6 +8,7 @@ import { texts } from '../../texts'
 import type { CompetitionDto } from '../../types'
 import { CompetitionForm, type CompetitionFormValues } from './CompetitionForm'
 import { DeleteCompetitionForm } from './DeleteCompetitionForm'
+import { toFightValues } from './fights'
 
 // Creates a new competition or edits an existing one based on the route
 export function CompetitionFormPage() {
@@ -105,6 +106,6 @@ function competitionValues(competition: CompetitionDto): CompetitionFormValues {
     place: competition.place === null ? '' : String(competition.place),
     resultNote: competition.resultNote ?? '',
     notes: competition.notes ?? '',
-    fights: competition.fights,
+    fights: competition.fights.map(toFightValues),
   }
 }
