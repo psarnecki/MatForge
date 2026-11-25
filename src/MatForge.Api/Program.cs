@@ -12,6 +12,7 @@ using MatForge.Data.Entities;
 using MatForge.Data.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +41,8 @@ builder.Services.AddScoped<ICompetitionService, CompetitionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddOptions<AnalyticsRulesOptions>()
     .Bind(builder.Configuration.GetSection(AnalyticsRulesOptions.Section))
-    .Validate(options => options.Training.MinSamples >= 1, "Analytics:Rules:Training:MinSamples must be at least 1.")
     .ValidateOnStart();
+builder.Services.AddSingleton<IValidateOptions<AnalyticsRulesOptions>, AnalyticsRulesOptionsValidator>();
 
 builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
 builder.Services.AddScoped<IValidator<SessionRequest>, SessionRequestValidator>();

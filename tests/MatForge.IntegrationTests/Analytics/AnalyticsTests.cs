@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace MatForge.IntegrationTests.Analytics;
@@ -379,6 +380,35 @@ public class AnalyticsTests(DatabaseFixture fixture)
         start.Should().Throw<OptionsValidationException>().WithMessage("*MinSamples must be at least 1*");
     }
 
+    [Fact]
+    public void Api_binds_the_thresholds_from_appsettings()
+    {
+        var options = fixture.ApiFactory.Services.GetRequiredService<IOptions<AnalyticsRulesOptions>>().Value;
+
+        options.Training.Should().BeEquivalentTo(new TrainingThresholds
+        {
+            MinSamples = 10, MinFinishes = 5, MinCount = 3, TechniqueShare = 0.30m, PositionShare = 0.40m, TrendDelta = 0.10m
+        });
+        options.Competition.Should().BeEquivalentTo(new RuleThresholds
+        {
+            MinSamples = 5, MinFinishes = 3, MinCount = 2, TechniqueShare = 0.30m, TrendDelta = 0.10m
+        });
+        options.GapDelta.Should().Be(0.20m);
+    }
+
+    [Fact]
+    public void Api_does_not_start_when_a_competition_share_is_0()
+    {
+        using var factory = new ApiFactory(fixture.ConnectionString).WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
+                new Dictionary<string, string?> { ["Analytics:Rules:Competition:TechniqueShare"] = "0" })));
+
+        var start = () => factory.Server;
+
+        start.Should().Throw<OptionsValidationException>()
+            .WithMessage("*Analytics:Rules:Competition:TechniqueShare must be above 0 and at most 1*");
+    }
+
     [Theory]
     [InlineData("from=1999-12-31", "from")]
     [InlineData("to=1999-12-31", "to")]
@@ -432,7 +462,7 @@ public class AnalyticsTests(DatabaseFixture fixture)
         await using var db = fixture.CreateDbContext(userId, counter);
 
         await call(new AnalyticsService(db,
-            Options.Create(new AnalyticsRulesOptions { Training = new RuleThresholds { MinSamples = 10 } })));
+            Options.Create(new AnalyticsRulesOptions { Training = new TrainingThresholds { MinSamples = 10 } })));
 
         return counter.Count;
     }
