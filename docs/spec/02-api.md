@@ -177,7 +177,7 @@ Source detection by host (case-insensitive; the domain or any subdomain such as 
 
 ## 10. Analytics
 
-`from` and `to` are optional: an omitted `from` means the date of the user's earliest session or competition (the dashboard's "All time"), but never later than `to`; an omitted `to` means today. `from ≤ to`, and `from` is not earlier than 2000-01-01. If the user has no data, both default to today. Response shapes and formulas: `03-analytics.md`.
+`from` and `to` are optional: an omitted `from` means the date of the user's earliest session or competition (the dashboard's "All time"), but never later than `to` and never earlier than 2000-01-01; an omitted `to` means today. If the user has no data, both default to today. Invalid dates return `400`: on `from` when it is before 2000-01-01, or after today while `to` is omitted; on `to` when it is before 2000-01-01, after 31 December of next year, or before `from` (D-44). The optional `disciplineId` and `formatId` filters work alone or together and restrict the data to matching grappling sessions (or competitions). Response shapes and formulas: `03-analytics.md`.
 
 | Method | Path | Extra query |
 |---|---|---|

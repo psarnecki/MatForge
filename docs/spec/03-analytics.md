@@ -18,7 +18,7 @@ Insight rules are separate classes implementing `IInsightRule` (one rule = one c
 | Period | Inclusive range `[from, to]`; `days = (to - from) + 1`. |
 | Previous period | `[from - days, from - 1]`: same length, directly before. |
 | Share | `count / denominator`, a number in `[0, 1]`, **rounded to 4 decimals** (`MidpointRounding.AwayFromZero`). The denominator is stated per metric. |
-| Ordering of lists | `count` descending, then `name` ascending. |
+| Ordering of lists | `count` descending, then `name` ascending (`StringComparer.InvariantCulture`), then `id`. A club with `id: null` comes after named clubs with the same count (D-44). |
 | Week | ISO week, starting Monday. |
 | `winRate` | `wins / rounds` (draws stay in the denominator, D-09). `null` when `rounds = 0`. |
 | `balance` | `wins - losses`. |
@@ -48,10 +48,11 @@ Grappling-only metrics use sessions with `Kind = Grappling`. Rounds of sessions 
 | Metric | Definition |
 |---|---|
 | `avgFeeling` | Mean of `Feeling` over all sessions, 1 decimal. `null` if no sessions. |
+| `bySection` | Always both kinds, `Grappling` and `Other`, with zeros (D-44). |
 | `byDiscipline`, `byFormat`, `byClub`, `byCharacter` | Over **grappling sessions only**. `share = count / grapplingSessionCount`. Club `id: null` = "Other club" (UI translates `null`). |
 | `weekly` | One entry for **every** ISO week that overlaps the period (including weeks with `count = 0`). Only sessions inside the period are counted; `weekStart` may be before `from`. |
 | `avgSessionsPerWeek` | `sessionsCount * 7 / days`, 1 decimal. |
-| `activeWeeksShare` | Weeks with `count ≥ 1` divided by the number of weeks in `weekly`. |
+| `activeWeeksShare` | Weeks with `count ≥ 1` divided by the number of weeks in `weekly` (a share, 4 decimals). |
 
 ## 4. Sparring (`GET /api/analytics/sparring`)
 
@@ -131,7 +132,7 @@ Optional filters `disciplineId`, `formatId` restrict to matching grappling sessi
 
 ### Thresholds
 
-Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound to one typed options class. Never hard-coded in rule classes.
+Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound to one typed options class. Never hard-coded in rule classes. The class (`AnalyticsRulesOptions`, created in T11 with `Training.MinSamples` and extended in T12) is validated at startup: `MinSamples` below 1 stops the app (D-44).
 
 | Setting | Training | Competition | Meaning |
 |---|---|---|---|
@@ -180,11 +181,11 @@ Period 2026-09-01..2026-09-30, filters none, training thresholds. 20 rounds:
 | Loss | none | none | 2 |
 | Draw | none | none | 2 |
 
-Expected:
+Expected (lists in the order of section 2):
 
 - `totals`: rounds 20, wins 12, losses 6, draws 2, `winRate` 0.6, `balance` 6.
-- `finishesFor.total` 8. `byTechnique`: RNC 4 (0.5), Triangle 2 (0.25), Kimura 2 (0.25). `byCategory`: choke 6 (0.75), shoulder_lock 2 (0.25). `byPosition`: recorded 5; back_control 3 (0.6), closed_guard 2 (0.4).
-- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: leg_lock 2 (0.5), choke 2 (0.5). `byPosition`: recorded 3; saddle 2 (0.6667), back_control 1 (0.3333).
+- `finishesFor.total` 8. `byTechnique`: RNC 4 (0.5), Kimura 2 (0.25), Triangle 2 (0.25). `byCategory`: choke 6 (0.75), shoulder_lock 2 (0.25). `byPosition`: recorded 5; back_control 3 (0.6), closed_guard 2 (0.4).
+- `finishesAgainst.total` 4. `byTechnique`: Inside Heel Hook 2 (0.5), Guillotine 1 (0.25), RNC 1 (0.25). `byCategory`: choke 2 (0.5), leg_lock 2 (0.5). `byPosition`: recorded 3; saddle 2 (0.6667), back_control 1 (0.3333).
 - Insights (training): `DominantFinisherTechnique` = RNC only (Triangle 0.25 < 0.30); `DominantFinisherCategory` = choke (0.75); `StrongPosition` = back_control (closed_guard has share 0.4 but count 2 < 3); **no** `RecurringLoss*` (finishesAgainst.total 4 < 5); **no** `VulnerablePosition` (recorded 3 < 5).
 
 ### GT-02: Insufficient data
