@@ -1,4 +1,5 @@
 import { texts } from '../../texts'
+import { MedalSquare } from './MedalSquare'
 
 interface PlaceTextProps {
   place: number | null
@@ -15,7 +16,7 @@ export function PlaceText({ place }: PlaceTextProps) {
   }
   return (
     <span className="competitions-place">
-      <span className={`competitions-medal competitions-medal-${place}`} aria-hidden="true" />
+      <MedalSquare place={place} />
       {medal}
     </span>
   )
