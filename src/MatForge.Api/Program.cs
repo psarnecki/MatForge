@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using FluentValidation;
 using MatForge.Api.Infrastructure;
+using MatForge.Application.Features.Analytics;
 using MatForge.Application.Features.Clubs;
 using MatForge.Application.Features.Competitions;
 using MatForge.Application.Features.Lookups;
@@ -36,12 +37,14 @@ builder.Services.AddScoped<ILookupsService, LookupsService>();
 builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<ICompetitionService, CompetitionService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
 builder.Services.AddScoped<IValidator<SessionRequest>, SessionRequestValidator>();
 builder.Services.AddScoped<IValidator<SessionListQuery>, SessionListQueryValidator>();
 builder.Services.AddScoped<IValidator<CompetitionRequest>, CompetitionRequestValidator>();
 builder.Services.AddScoped<IValidator<CompetitionListQuery>, CompetitionListQueryValidator>();
+builder.Services.AddScoped<IValidator<AnalyticsQuery>, AnalyticsQueryValidator>();
 
 var app = builder.Build();
 
