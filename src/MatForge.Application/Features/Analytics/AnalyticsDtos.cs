@@ -1,3 +1,4 @@
+using MatForge.Application.Features.Analytics.Calculators;
 using MatForge.Data.Enums;
 
 namespace MatForge.Application.Features.Analytics;
@@ -28,3 +29,24 @@ public record FormatGroupDto(int Id, string Name, int DisciplineId, int Count, i
 public record ClubGroupDto(int? Id, string? Name, int Count, int Minutes, decimal Share);
 
 public record WeekDto(DateOnly WeekStart, int Count, int Minutes);
+
+public record SparringDto(RoundTotalsDto Totals, FinishesDto FinishesFor, FinishesDto FinishesAgainst, TrendDto Trend);
+
+public record RoundTotalsDto(int Rounds, int Wins, int Losses, int Draws, decimal? WinRate, int Balance);
+
+public record FinishesDto(
+    int Total,
+    List<FinishGroupDto> ByTechnique,
+    List<FinishGroupDto> ByCategory,
+    PositionFinishesDto ByPosition);
+
+public record FinishGroupDto(int Id, string Name, int Count, decimal Share);
+
+// Only finishes with a recorded position
+public record PositionFinishesDto(int Recorded, List<FinishGroupDto> Items);
+
+public record TrendDto(Bucket Bucket, List<TrendPointDto> Points, PreviousPeriodDto Previous, decimal? WinRateDelta);
+
+public record TrendPointDto(DateOnly Start, int Rounds, int Wins, int Losses, int Draws, decimal? WinRate);
+
+public record PreviousPeriodDto(int Rounds, decimal? WinRate);

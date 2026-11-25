@@ -16,3 +16,14 @@ public record SessionRow(
     string? CharacterName,
     int? ClubId,
     string? ClubName);
+
+// Date comes from the session, while technique, category and position are null when not recorded
+public record RoundRow(
+    DateOnly Date,
+    RoundResult Result,
+    int? TechniqueId,
+    string? TechniqueName,
+    int? CategoryId,
+    string? CategoryName,
+    int? PositionId,
+    string? PositionName);
