@@ -9,4 +9,8 @@ public static class AnalyticsMath
 
     // Draws remain in the denominator
     public static decimal? WinRate(int wins, int rounds) => rounds == 0 ? null : Share(wins, rounds);
+
+    // Subtracts the unrounded rates and rounds once
+    public static decimal RateDifference(int wins, int total, int otherWins, int otherTotal) =>
+        RoundFraction((decimal)wins / total - (decimal)otherWins / otherTotal);
 }
