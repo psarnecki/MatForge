@@ -112,7 +112,7 @@ Request (flat, nullable fields by `kind`; rules in `01-domain-model.md` 4.4; rou
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/competitions?from=&to=` | Both optional. Returns `CompetitionSummary[]` sorted by date desc. |
+| GET | `/api/competitions?from=&to=` | Both optional; `to` before `from` returns `400` on `to`; no maximum range. Returns `CompetitionSummary[]` sorted by date desc, then id desc. |
 | GET | `/api/competitions/{id}` | With fights |
 | POST | `/api/competitions` | With fights |
 | PUT | `/api/competitions/{id}` | Replaces competition and fights |

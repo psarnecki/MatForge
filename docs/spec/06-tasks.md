@@ -47,7 +47,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Rounds of a saved session can be edited and removed in the form. Until then the T07 form keeps the loaded rounds unchanged, so a session with rounds cannot be changed to Other or to a character without sparring (the server's 400 is shown above Save).
 - Accept: 8 rounds can be logged with one tap each; technique selector is a select grouped by category and limited to the categories offered in the session's discipline; the position selector lists only the positions offered in that discipline; Draw hides technique/position; saved data round-trips.
 
-**T09 Competitions API and UI** [01 §4.6-4.7, 02 §6, 04 §4.5] (MUST)
+**T09 Competitions API and UI** [01 §4.6-4.7, 02 §6, 04 §4.5] (MUST, done)
 - Service, validators (I-01, I-04, I-10), controller, list, form with fights, delete with 409 rule.
 - Accept: CRUD with fights; technique only for Submission, Throw, or Pin, and only from categories offered in the competition's discipline; integration tests including isolation; usable at 390 px.
 

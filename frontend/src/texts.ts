@@ -16,6 +16,13 @@ const sessionSplit = (grappling: number, other: number) => {
   return `${sessionCount(grappling + other)}: ${parts.join(', ')}`
 }
 
+// Formats a number as an ordinal (1st, 2nd, 3rd, etc.)
+const ordinal = (n: number) => {
+  const lastTwo = n % 100
+  const suffix = lastTwo >= 11 && lastTwo <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')
+  return `${n}${suffix}`
+}
+
 export const texts = {
   appName: 'MatForge',
   nav: {
@@ -187,5 +194,79 @@ export const texts = {
     deleteSession: 'Delete session',
     deleteSessionQuestion: (date: Date) => `Delete the session of ${dayTitle(date)}? This cannot be undone.`,
     sessionDeleted: 'Session deleted',
+  },
+  competitions: {
+    title: 'Competitions',
+    addCompetition: 'Add competition',
+    empty: 'No competitions yet. Add a competition and its fights to see your record here.',
+    date: 'Date',
+    competition: 'Competition',
+    place: 'Place',
+    record: 'Record',
+    // Formats a date as "12 Sep 2026"
+    shortDate: (date: Date) => `${date.getDate()} ${monthNames[date.getMonth()].slice(0, 3)} ${date.getFullYear()}`,
+    medals: { 1: 'Gold', 2: 'Silver', 3: 'Bronze' } as Record<number, string>,
+    placeOrdinal: ordinal,
+    noPlace: 'No place',
+    recordText: (wins: number, losses: number, draws: number) => `${wins}W ${losses}L ${draws}D`,
+    recordLabel: (wins: number, losses: number, draws: number) => `${wins} won, ${losses} lost, ${draws} drawn`,
+    newCompetitionTitle: 'Add competition',
+    editCompetitionTitle: 'Edit competition',
+    backToCompetitions: 'Back to competitions',
+    notFound: 'Competition not found.',
+    name: 'Name',
+    nameRequired: 'Enter the name of the competition.',
+    dateRequired: 'Choose a date.',
+    location: 'Location',
+    discipline: 'Discipline',
+    disciplineRequired: 'Choose a discipline.',
+    format: 'Format',
+    formatRequired: 'Choose a format.',
+    choose: 'Choose',
+    ageCategory: 'Age category',
+    skillLevel: 'Skill level',
+    weightCategory: 'Weight category',
+    otherPlace: 'Other place',
+    placeInvalid: 'Enter a place from 1 to 1000.',
+    resultNote: 'Result note',
+    notes: 'Notes (optional)',
+    saveCompetition: 'Save competition',
+    competitionSaved: 'Competition saved',
+    deleteCompetition: 'Delete competition',
+    deleteCompetitionQuestion: (name: string) => `Delete ${name}? This cannot be undone.`,
+    competitionDeleted: 'Competition deleted',
+    fightsLabel: (count: number) => (count > 0 ? `Fights (${count})` : 'Fights'),
+    addFight: 'Add fight',
+    fightsLimit: (max: number) => `A competition can have at most ${max} fights.`,
+    // Notice shown when a discipline change affects fights
+    fightsNotOffered: (discipline: string, fights: number[]) =>
+      `${fights.length === 1 ? 'Fight' : 'Fights'} ${fights.join(', ')}: the technique is not available for ${discipline}.`,
+    fightTitle: (number: number) => `Fight ${number}`,
+    noOpponent: 'Unnamed opponent',
+    noResult: 'No result',
+    results: { Win: 'Win', Loss: 'Loss', Draw: 'Draw' },
+    methods: {
+      Submission: 'Submission',
+      Throw: 'Throw',
+      Pin: 'Pin',
+      Points: 'Points',
+      Decision: 'Decision',
+      Disqualification: 'Disqualification',
+      Walkover: 'Walkover',
+    },
+    result: 'Result',
+    resultRequired: 'Choose a result.',
+    method: 'Method',
+    technique: 'Technique (optional)',
+    noTechnique: 'None',
+    chooseDisciplineFirst: 'Choose a discipline to add a technique.',
+    duration: 'Duration (optional)',
+    durationHint: 'm:ss, for example 3:32',
+    durationInvalid: 'Enter a duration from 0:01 to 60:00.',
+    opponent: 'Opponent (optional)',
+    removeFight: 'Remove fight',
+    fightError: (fight: number, message: string) => `Fight ${fight}: ${message}`,
+    // Screen reader label for a fight row with an error
+    fightInvalid: (row: string) => `${row}, has an error`,
   },
 }

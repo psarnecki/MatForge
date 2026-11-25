@@ -1,10 +1,11 @@
 import { useId } from 'react'
 import { Button } from '../../components/Button'
+import { SegmentedControl } from '../../components/SegmentedControl'
 import { Select, type SelectOption } from '../../components/Select'
+import { techniqueGroups } from '../../lib/techniques'
 import { texts } from '../../texts'
 import type { LookupsDto, RoundResult } from '../../types'
-import { positionOptions, techniqueGroups, type RoundErrors, type RoundValues } from './rounds'
-import { SegmentedControl } from './SegmentedControl'
+import { positionOptions, type RoundErrors, type RoundValues } from './rounds'
 
 const notesMaxLength = 500
 const results: RoundResult[] = ['Win', 'Loss', 'Draw']

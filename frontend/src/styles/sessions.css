@@ -314,44 +314,6 @@
   gap: 16px;
 }
 
-/* Match Field and Select labels for grouped controls */
-.sessions-label {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
-
-.sessions-segments {
-  display: flex;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.sessions-segments button {
-  flex: 1;
-  height: calc(var(--control-height) - 2px);
-  padding: 0;
-  border: 0;
-  border-right: 1px solid var(--line);
-  background: none;
-  color: var(--text-muted);
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.sessions-segments button:last-child {
-  border-right: 0;
-}
-
-.sessions-segments button[aria-pressed='true'] {
-  background: var(--text);
-  color: var(--surface);
-}
-
 .sessions-quick {
   margin-top: 8px;
 }
@@ -498,15 +460,6 @@
 }
 
 @media (max-width: 575px) {
-  .sessions-sheet {
-    width: 100%;
-    max-width: 100%;
-    max-height: 85dvh;
-    margin: auto 0 0;
-    padding: 16px 16px 24px;
-    border-width: 1px 0 0;
-  }
-
   .sessions-sheet-actions .button {
     flex: 1;
   }

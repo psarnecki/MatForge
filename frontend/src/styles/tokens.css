@@ -14,6 +14,10 @@
   --win: #1f7a4a;
   --loss: #d20a0a;
   --draw: #6b6e75;
+  /* Medal colors for the top three places */
+  --gold: #c9a227;
+  --silver: #9ea3a8;
+  --bronze: #a86b32;
   --backdrop: rgb(0 0 0 / 50%);
 
   --font-heading: 'Barlow Condensed', sans-serif;

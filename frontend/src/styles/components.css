@@ -95,6 +95,45 @@
   white-space: pre-line;
 }
 
+/* Match Field and Select labels for grouped controls */
+.field-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+/* Segmented control */
+.segments {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.segments button {
+  flex: 1;
+  height: calc(var(--control-height) - 2px);
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segments button:last-child {
+  border-right: 0;
+}
+
+.segments button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--surface);
+}
+
 /* Dialog */
 .dialog {
   width: min(480px, calc(100% - 32px));
@@ -115,6 +154,18 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+/* Dialog shown as a bottom sheet on mobile */
+@media (max-width: 575px) {
+  .dialog-sheet {
+    width: 100%;
+    max-width: 100%;
+    max-height: 85dvh;
+    margin: auto 0 0;
+    padding: 16px 16px 24px;
+    border-width: 1px 0 0;
+  }
 }
 
 /* Toast */
