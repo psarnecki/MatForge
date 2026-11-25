@@ -69,7 +69,9 @@ export function CompetitionForm({ lookups, initialValues, competitionId, onDelet
   useEffect(() => {
     const field = formRef.current?.querySelector('.field-error')?.closest('.field')
     if (field) {
-      field.querySelector<HTMLElement>('input, select, textarea, button')?.focus()
+      // Prioritizes the invalid place input over the medal buttons
+      const control = field.querySelector<HTMLElement>('[aria-invalid="true"]') ?? field.querySelector<HTMLElement>('input, select, textarea, button')
+      control?.focus()
     } else {
       formRef.current?.querySelector('.competitions-error')?.scrollIntoView({ block: 'center' })
     }
