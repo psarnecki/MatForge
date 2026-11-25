@@ -4,7 +4,7 @@ namespace MatForge.Application.Features.Analytics.Calculators;
 
 public static class OverviewCalculator
 {
-    // Consistent ordering across machines, ignoring case and accents
+    // Compares letters first and uses accents and case only to break ties
     private static readonly StringComparer Names = StringComparer.InvariantCulture;
 
     public static OverviewDto Calculate(DateRange period, IReadOnlyCollection<SessionRow> rows)
