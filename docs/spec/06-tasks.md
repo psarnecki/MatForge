@@ -57,16 +57,17 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 ## Phase 4: Analytics backend
 
-**T11 Overview and sparring calculators** [03 §2-4] (MUST)
+**T11 Overview and sparring calculators** [03 §2-4] (MUST, done)
 - Row records, loaders, pure calculators, `Share` helper, date helpers (weeks, previous period, buckets), endpoints `overview` and `sparring`.
+- Also done here (D-44): `from`/`to` defaults and validation, the sparring filters, and `AnalyticsRulesOptions` with `Training.MinSamples` (validated at startup).
 - Accept: **GT-01 (distribution part), GT-03, GT-04** pass as unit tests; integration tests for the endpoints, with data created inside the tests (not by the demo generator); empty data returns zeros and nulls.
 
 **T12 Competition analytics and insight rules** [03 §5-6] (MUST)
-- Competition calculator; `IInsightRule` and all rules from the catalog; options class bound from `Analytics:Rules`; endpoints `competitions` and `insights`.
+- Competition calculator; `IInsightRule` and all rules from the catalog; extend the options class `AnalyticsRulesOptions` (created in T11, D-44) with the other thresholds and the `Competition` profile; endpoints `competitions` and `insights`.
 - Accept: **GT-01 (insights part), GT-02, GT-06** pass; one unit test per rule (fires / does not fire at the boundary values); thresholds are only read from configuration.
 
 **T13 Analytics hardening** [03 §9] (MUST)
-- Filters (`disciplineId`, `formatId`), validation of `from`/`to`, isolation tests for all four endpoints, performance check with 5 years of generated data (under 500 ms).
+- Validation of the filters `disciplineId` and `formatId` (unknown id, format of another discipline; the filters and the `from`/`to` validation are done in T11, D-44), isolation tests for all four endpoints, performance check with 5 years of generated data (under 500 ms).
 - Accept: all analytics tests green; query plan reviewed (projections, no tracking).
 
 ## Phase 5: Dashboard and goals
