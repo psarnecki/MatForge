@@ -323,7 +323,6 @@ public class AnalyticsTests(DatabaseFixture fixture)
         (await RoundsAsync($"&disciplineId={ids.Bjj}")).Should().Be((3, 1));
         (await RoundsAsync($"&disciplineId={ids.Bjj}&formatId={ids.NoGi}")).Should().Be((1, 0));
         (await RoundsAsync($"&formatId={ids.Freestyle}")).Should().Be((1, 1));
-        (await RoundsAsync($"&disciplineId={ids.Bjj}&formatId={ids.Freestyle}")).Should().Be((0, 0));
     }
 
     [Fact]
@@ -520,7 +519,6 @@ public class AnalyticsTests(DatabaseFixture fixture)
         (await FightsAsync($"&disciplineId={ids.Bjj}")).Should().Be((3, 1));
         (await FightsAsync($"&disciplineId={ids.Bjj}&formatId={ids.NoGi}")).Should().Be((1, 0));
         (await FightsAsync($"&formatId={ids.Freestyle}")).Should().Be((1, 1));
-        (await FightsAsync($"&disciplineId={ids.Bjj}&formatId={ids.Freestyle}")).Should().Be((0, 0));
     }
 
     [Fact]
@@ -745,6 +743,23 @@ public class AnalyticsTests(DatabaseFixture fixture)
 
         await ExpectValidationErrorAsync(
             await user.Client.GetAsync("/api/analytics/insights?from=2026-09-10&to=2026-09-09"), "to");
+    }
+
+    [Theory]
+    [InlineData("sparring")]
+    [InlineData("competitions")]
+    [InlineData("insights")]
+    public async Task Unknown_discipline_and_format_of_another_discipline_return_400_on_the_field(string endpoint)
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+
+        await ExpectValidationErrorAsync(
+            await user.Client.GetAsync($"/api/analytics/{endpoint}?disciplineId=0"), "disciplineId");
+        await ExpectValidationErrorAsync(
+            await user.Client.GetAsync($"/api/analytics/{endpoint}?disciplineId={ids.Bjj}&formatId={ids.Freestyle}"), "formatId");
+        await ExpectValidationErrorAsync(
+            await user.Client.GetAsync($"/api/analytics/{endpoint}?formatId=0"), "formatId");
     }
 
     [Fact]
