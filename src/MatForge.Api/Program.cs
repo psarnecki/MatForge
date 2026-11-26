@@ -21,6 +21,7 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Connection string 'Default' not found.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<DictionarySeeder>();
+builder.Services.AddScoped<DemoDataSeeder>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -70,6 +71,12 @@ using (var scope = app.Services.CreateScope())
 {
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<DictionarySeeder>().SeedAsync();
+
+    // Seeds the demo user with a history ending today, when enabled
+    if (app.Configuration.GetValue<bool>("Seed:DemoData"))
+    {
+        await scope.ServiceProvider.GetRequiredService<DemoDataSeeder>().SeedAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
 }
 
 app.UseExceptionHandler();
