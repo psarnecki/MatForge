@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using FluentAssertions;
 using MatForge.Application.Features.Analytics;
 using MatForge.Application.Features.Analytics.Calculators;
+using MatForge.Application.Features.Analytics.Rules;
 using MatForge.Application.Features.Clubs;
 using MatForge.Data.Enums;
 using Microsoft.AspNetCore.Hosting;
@@ -567,6 +568,206 @@ public class AnalyticsTests(DatabaseFixture fixture)
     }
 
     [Fact]
+    public async Task Insights_return_training_items_with_params_and_insufficient_competition_data()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10",
+        [
+            ..Enumerable.Repeat(Round("Win", ids.Armbar, ids.Mount), 3),
+            ..Enumerable.Repeat(Round("Win", ids.Rnc, ids.BackControl), 2),
+            ..Enumerable.Repeat(Round("Loss"), 5)
+        ]));
+
+        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+
+        var training = json["training"]!;
+        training["status"]!.GetValue<string>().Should().Be("Ok");
+        training["samples"]!.GetValue<int>().Should().Be(10);
+        training["minSamples"]!.GetValue<int>().Should().Be(10);
+        RuleCodes(training).Should().Equal("DominantFinisherTechnique", "DominantFinisherCategory", "StrongPosition");
+        var first = training["items"]![0]!;
+        first["type"]!.GetValue<string>().Should().Be("Strength");
+        first["params"]!.AsObject().Select(p => p.Key).Should().Equal("id", "name", "count", "share");
+        first["params"]!["id"]!.GetValue<int>().Should().Be(ids.Armbar);
+        first["params"]!["name"]!.GetValue<string>().Should().Be("Armbar");
+        first["params"]!["count"]!.GetValue<int>().Should().Be(3);
+        first["params"]!["share"]!.GetValue<decimal>().Should().Be(0.6m);
+        training["items"]![2]!["params"]!["name"]!.GetValue<string>().Should().Be("Mount");
+
+        var competition = json["competition"]!;
+        competition["status"]!.GetValue<string>().Should().Be("InsufficientData");
+        competition["samples"]!.GetValue<int>().Should().Be(0);
+        competition["minSamples"]!.GetValue<int>().Should().Be(5);
+        competition["items"]!.AsArray().Should().BeEmpty();
+        json["comparison"]!.AsArray().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Insights_without_data_are_insufficient_on_both_sides()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+
+        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+
+        json["training"]!["status"]!.GetValue<string>().Should().Be("InsufficientData");
+        json["training"]!["items"]!.AsArray().Should().BeEmpty();
+        json["competition"]!["status"]!.GetValue<string>().Should().Be("InsufficientData");
+        json["competition"]!["items"]!.AsArray().Should().BeEmpty();
+        json["comparison"]!.AsArray().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Insights_compare_training_and_competitions_when_both_have_enough_data()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Rounds(6, 4)));
+        await CreateCompetitionAsync(user, ids, "2026-09-12", Fights(2, 3));
+
+        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+
+        var gap = json["comparison"]!.AsArray().Should().ContainSingle().Subject!;
+        gap["rule"]!.GetValue<string>().Should().Be("CompetitionVsTrainingGap");
+        gap["type"]!.GetValue<string>().Should().Be("Info");
+        gap["params"]!.AsObject().Select(p => p.Key).Should().Equal("trainingWinRate", "competitionWinRate", "delta");
+        gap["params"]!["trainingWinRate"]!.GetValue<decimal>().Should().Be(0.6m);
+        gap["params"]!["competitionWinRate"]!.GetValue<decimal>().Should().Be(0.4m);
+        gap["params"]!["delta"]!.GetValue<decimal>().Should().Be(-0.2m);
+    }
+
+    [Fact]
+    public async Task Insights_apply_the_filters_to_both_sides()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Rounds(10, 0)));
+        await CreateCompetitionAsync(user, ids, Date("2026-09-12"), fights: Fights(5, 0),
+            disciplineId: ids.Wrestling, formatId: ids.Freestyle);
+
+        async Task<(string Training, int Rounds, string Competition, int Fights)> SidesAsync(string filters)
+        {
+            var json = await GetJsonAsync(user, $"/api/analytics/insights?from=2026-09-01&to=2026-09-30{filters}");
+            return (json["training"]!["status"]!.GetValue<string>(), json["training"]!["samples"]!.GetValue<int>(),
+                json["competition"]!["status"]!.GetValue<string>(), json["competition"]!["samples"]!.GetValue<int>());
+        }
+
+        (await SidesAsync("")).Should().Be(("Ok", 10, "Ok", 5));
+        (await SidesAsync($"&disciplineId={ids.Bjj}")).Should().Be(("Ok", 10, "InsufficientData", 0));
+        (await SidesAsync($"&disciplineId={ids.Wrestling}&formatId={ids.Freestyle}"))
+            .Should().Be(("InsufficientData", 0, "Ok", 5));
+    }
+
+    [Fact]
+    public async Task Insights_skip_the_seeded_other_entries()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10",
+        [
+            ..Enumerable.Repeat(Round("Win", ids.OtherFinish, ids.OtherPosition), 4),
+            ..Enumerable.Repeat(Round("Win", ids.Armbar, ids.Mount), 3),
+            ..Enumerable.Repeat(Round("Loss"), 3)
+        ]));
+
+        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+
+        var items = json["training"]!["items"]!.AsArray();
+        RuleCodes(json["training"]!).Should().Equal("DominantFinisherTechnique", "DominantFinisherCategory", "StrongPosition");
+        items.Select(i => i!["params"]!["name"]!.GetValue<string>()).Should().Equal("Armbar", "Arm Lock", "Mount");
+        items.Select(i => i!["params"]!["share"]!.GetValue<decimal>()).Should().Equal(0.4286m, 0.4286m, 0.4286m);
+    }
+
+    [Fact]
+    public async Task Insights_use_the_thresholds_from_configuration()
+    {
+        using var factory = new ApiFactory(fixture.ConnectionString).WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Analytics:Rules:Training:MinSamples"] = "1",
+                ["Analytics:Rules:Training:MinFinishes"] = "1",
+                ["Analytics:Rules:Training:MinCount"] = "1"
+            })));
+        var client = factory.CreateClient();
+        var credentials = new { email = $"user-{Guid.NewGuid():N}@test.local", password = "Test1234!" };
+        (await client.PostAsJsonAsync("/api/auth/register", credentials)).EnsureSuccessStatusCode();
+        (await client.PostAsJsonAsync("/api/auth/login?useCookies=true", credentials)).EnsureSuccessStatusCode();
+        var ids = await IdsAsync();
+        (await client.PostAsJsonAsync("/api/sessions", Sparring(ids, "2026-09-10", Round("Win", ids.Armbar))))
+            .StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var json = JsonNode.Parse(await client.GetStringAsync("/api/analytics/insights?from=2026-09-01&to=2026-09-30"))!;
+
+        json["training"]!["status"]!.GetValue<string>().Should().Be("Ok");
+        json["training"]!["minSamples"]!.GetValue<int>().Should().Be(1);
+        RuleCodes(json["training"]!).Should().Equal("DominantFinisherTechnique", "DominantFinisherCategory");
+    }
+
+    [Fact]
+    public async Task Insights_ignore_another_users_data()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var otherUser = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Rounds(9, 0)));
+        await CreateSessionAsync(otherUser, Sparring(ids, "2026-09-10", Rounds(5, 5)));
+        await CreateCompetitionAsync(otherUser, ids, "2026-09-12", Fights(5, 0));
+
+        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+
+        json["training"]!["samples"]!.GetValue<int>().Should().Be(9);
+        json["training"]!["status"]!.GetValue<string>().Should().Be("InsufficientData");
+        json["competition"]!["samples"]!.GetValue<int>().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Insights_run_three_queries_and_one_more_without_from()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Rounds(6, 4)));
+        await CreateCompetitionAsync(user, ids, "2026-09-12", Fights(2, 3));
+
+        var withFrom = await CountQueriesAsync(user.Id, service => service.GetInsightsAsync(
+            new AnalyticsFilterQuery { From = new DateOnly(2026, 9, 1), To = new DateOnly(2026, 9, 30), DisciplineId = ids.Bjj },
+            CancellationToken.None));
+        var withoutFrom = await CountQueriesAsync(user.Id, service => service.GetInsightsAsync(
+            new AnalyticsFilterQuery(), CancellationToken.None));
+
+        withFrom.Should().Be(3);
+        withoutFrom.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task Insights_validate_the_period_like_the_overview()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+
+        await ExpectValidationErrorAsync(
+            await user.Client.GetAsync("/api/analytics/insights?from=2026-09-10&to=2026-09-09"), "to");
+    }
+
+    [Fact]
+    public void Every_insight_rule_is_registered_in_catalog_order()
+    {
+        Type[] catalog =
+        [
+            typeof(DominantFinisherTechniqueRule), typeof(DominantFinisherCategoryRule),
+            typeof(RecurringLossTechniqueRule), typeof(RecurringLossCategoryRule),
+            typeof(StrongPositionRule), typeof(VulnerablePositionRule),
+            typeof(ImprovingWinRateRule), typeof(DecliningWinRateRule),
+            typeof(CompetitionVsTrainingGapRule)
+        ];
+        var implemented = typeof(IInsightRule).Assembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IInsightRule).IsAssignableFrom(t));
+
+        var registered = fixture.ApiFactory.Services.GetServices<IInsightRule>().Select(r => r.GetType());
+
+        registered.Should().Equal(catalog);
+        implemented.Should().BeEquivalentTo(catalog);
+    }
+
+    [Fact]
     public void Api_does_not_start_when_min_samples_is_below_1()
     {
         using var factory = new ApiFactory(fixture.ConnectionString).WithWebHostBuilder(builder =>
@@ -638,6 +839,7 @@ public class AnalyticsTests(DatabaseFixture fixture)
         (await client.GetAsync("/api/analytics/overview")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         (await client.GetAsync("/api/analytics/sparring")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         (await client.GetAsync("/api/analytics/competitions")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.GetAsync("/api/analytics/insights")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private static async Task ExpectValidationErrorAsync(HttpResponseMessage response, string key)
@@ -655,6 +857,9 @@ public class AnalyticsTests(DatabaseFixture fixture)
     private static async Task<CompetitionAnalyticsDto> GetCompetitionsAsync(LoggedInUser user, string query) =>
         (await user.Client.GetFromJsonAsync<CompetitionAnalyticsDto>($"/api/analytics/competitions?{query}", Json))!;
 
+    private static IEnumerable<string> RuleCodes(JsonNode side) =>
+        side["items"]!.AsArray().Select(i => i!["rule"]!.GetValue<string>());
+
     private static async Task<JsonNode> GetJsonAsync(LoggedInUser user, string url) =>
         JsonNode.Parse(await user.Client.GetStringAsync(url))!;
 
@@ -663,11 +868,9 @@ public class AnalyticsTests(DatabaseFixture fixture)
         var counter = new QueryCounter();
         await using var db = fixture.CreateDbContext(userId, counter);
 
-        await call(new AnalyticsService(db,
-            Options.Create(new AnalyticsRulesOptions
-            {
-                Training = new TrainingThresholds { MinSamples = 10 }, Competition = new RuleThresholds { MinSamples = 5 }
-            })));
+        var services = fixture.ApiFactory.Services;
+        await call(new AnalyticsService(db, services.GetRequiredService<IOptions<AnalyticsRulesOptions>>(),
+            services.GetServices<IInsightRule>()));
 
         return counter.Count;
     }
@@ -756,12 +959,14 @@ public class AnalyticsTests(DatabaseFixture fixture)
         var rnc = await db.Techniques.SingleAsync(t => t.Code == "rear_naked_choke");
         var mount = await db.Positions.SingleAsync(p => p.Code == "mount");
         var backControl = await db.Positions.SingleAsync(p => p.Code == "back_control");
+        var otherFinish = await db.Techniques.SingleAsync(t => t.Code == "other_finish");
+        var otherPosition = await db.Positions.SingleAsync(p => p.Code == "other_position");
         return new DictionaryIds(bjj.Id, gi.Id, noGi.Id, sparring.Id, running.Id, wrestling.Id, freestyle.Id,
-            armbar.Id, armbar.CategoryId, rnc.Id, rnc.CategoryId, mount.Id, backControl.Id);
+            armbar.Id, armbar.CategoryId, rnc.Id, rnc.CategoryId, mount.Id, backControl.Id, otherFinish.Id, otherPosition.Id);
     }
 
     private record DictionaryIds(int Bjj, int Gi, int NoGi, int Sparring, int Running, int Wrestling, int Freestyle,
-        int Armbar, int ArmLock, int Rnc, int Choke, int Mount, int BackControl);
+        int Armbar, int ArmLock, int Rnc, int Choke, int Mount, int BackControl, int OtherFinish, int OtherPosition);
 
     private class QueryCounter : DbCommandInterceptor
     {
