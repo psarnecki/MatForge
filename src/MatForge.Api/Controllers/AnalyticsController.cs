@@ -19,4 +19,8 @@ public class AnalyticsController(IAnalyticsService analyticsService) : Controlle
     public Task<CompetitionAnalyticsDto> GetCompetitions([FromQuery] AnalyticsFilterQuery query,
         CancellationToken cancellationToken) =>
         analyticsService.GetCompetitionsAsync(query, cancellationToken);
+
+    [HttpGet("insights")]
+    public Task<InsightsDto> GetInsights([FromQuery] AnalyticsFilterQuery query, CancellationToken cancellationToken) =>
+        analyticsService.GetInsightsAsync(query, cancellationToken);
 }

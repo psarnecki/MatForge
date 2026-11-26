@@ -1,11 +1,13 @@
 using MatForge.Application.Features.Analytics.Calculators;
+using MatForge.Application.Features.Analytics.Rules;
 using MatForge.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace MatForge.Application.Features.Analytics;
 
-public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> options) : IAnalyticsService
+public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> options, IEnumerable<IInsightRule> rules)
+    : IAnalyticsService
 {
     // For GET /api/analytics/overview (one query loads the sessions, the calculator does the rest)
     public async Task<OverviewDto> GetOverviewAsync(AnalyticsQuery query, CancellationToken cancellationToken)
@@ -28,28 +30,8 @@ public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> o
     public async Task<SparringDto> GetSparringAsync(AnalyticsFilterQuery query, CancellationToken cancellationToken)
     {
         var period = await ResolvePeriodAsync(query, cancellationToken);
-        var start = period.Previous.From;
-        var end = period.To;
-
-        var rounds = db.SparringRounds.Where(r => r.TrainingSession.Date >= start && r.TrainingSession.Date <= end);
-        if (query.DisciplineId != null)
-        {
-            rounds = rounds.Where(r => r.TrainingSession.DisciplineId == query.DisciplineId);
-        }
-
-        if (query.FormatId != null)
-        {
-            rounds = rounds.Where(r => r.TrainingSession.FormatId == query.FormatId);
-        }
-
-        var rows = await rounds
-            .Select(r => new RoundRow(r.TrainingSession.Date, r.Result,
-                r.TechniqueId, r.Technique!.Name,
-                (int?)r.Technique.CategoryId, r.Technique.Category.Name,
-                r.PositionId, r.Position!.Name))
-            .ToListAsync(cancellationToken);
-
-        return SparringCalculator.Calculate(period, rows, options.Value.Training.MinSamples);
+        var rounds = await LoadRoundsAsync(period, query, cancellationToken);
+        return SparringCalculator.Calculate(period, rounds, options.Value.Training.MinSamples);
     }
 
     // For GET /api/analytics/competitions (one query loads competitions from the current and previous periods, including their fights)
@@ -86,6 +68,55 @@ public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> o
                     (int?)f.Technique.CategoryId, f.Technique.Category.Name)).ToList()))
             .ToListAsync(cancellationToken);
     }
+
+    // For GET /api/analytics/insights (the sparring and competition loaders plus one query for the "Other" entries)
+    public async Task<InsightsDto> GetInsightsAsync(AnalyticsFilterQuery query, CancellationToken cancellationToken)
+    {
+        var period = await ResolvePeriodAsync(query, cancellationToken);
+        var rounds = await LoadRoundsAsync(period, query, cancellationToken);
+        var competitions = await LoadCompetitionsAsync(period, query, cancellationToken);
+        var other = await LoadOtherEntriesAsync(cancellationToken);
+
+        return InsightsCalculator.Calculate(
+            SparringCalculator.Calculate(period, rounds, options.Value.Training.MinSamples),
+            CompetitionCalculator.Calculate(period, competitions, options.Value.Competition.MinSamples),
+            other, options.Value, rules);
+    }
+
+    // Filters apply to the round's session
+    private Task<List<RoundRow>> LoadRoundsAsync(DateRange period, AnalyticsFilterQuery query,
+        CancellationToken cancellationToken)
+    {
+        var start = period.Previous.From;
+        var end = period.To;
+
+        var rounds = db.SparringRounds.Where(r => r.TrainingSession.Date >= start && r.TrainingSession.Date <= end);
+        if (query.DisciplineId != null)
+        {
+            rounds = rounds.Where(r => r.TrainingSession.DisciplineId == query.DisciplineId);
+        }
+
+        if (query.FormatId != null)
+        {
+            rounds = rounds.Where(r => r.TrainingSession.FormatId == query.FormatId);
+        }
+
+        return rounds
+            .Select(r => new RoundRow(r.TrainingSession.Date, r.Result,
+                r.TechniqueId, r.Technique!.Name,
+                (int?)r.Technique.CategoryId, r.Technique.Category.Name,
+                r.PositionId, r.Position!.Name))
+            .ToListAsync(cancellationToken);
+    }
+
+    // "Other" entries are identified by their codes, which never change
+    private Task<OtherEntries> LoadOtherEntriesAsync(CancellationToken cancellationToken) =>
+        db.Techniques
+            .Where(t => t.Code == "other_finish")
+            .Select(t => new OtherEntries(t.Id,
+                db.TechniqueCategories.Where(c => c.Code == "other").Select(c => c.Id).First(),
+                db.Positions.Where(p => p.Code == "other_position").Select(p => p.Id).First()))
+            .SingleAsync(cancellationToken);
 
     // An omitted start requires the date of the earliest session or competition (one extra query)
     private async Task<DateRange> ResolvePeriodAsync(AnalyticsQuery query, CancellationToken cancellationToken)
