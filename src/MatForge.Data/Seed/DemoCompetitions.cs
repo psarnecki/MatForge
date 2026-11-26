@@ -6,9 +6,12 @@ namespace MatForge.Data.Seed;
 // Competitions of the demo athlete, with random brackets in the earlier years and scripted events in the story
 internal class DemoCompetitions(Random random, DemoDictionary dictionary, DemoRounds rounds)
 {
-    // These events affect the insights for the last 90 days and the 90 days before them
+    // The events of the story, where the later ones shape the insights for the last 90 days and the 90 days before them
     private static readonly Scripted[] ScriptedEvents =
     [
+        // The first medal, in the first year at blue belt
+        new(233, "Łódź Open", "Łódź", "bjj", "gi", "Blue", 3, null, null,
+            [Win(FightMethod.Submission, "armbar"), Win(FightMethod.Points), Loss(FightMethod.Points)]),
         new(120, "Warsaw Wrestling Open", "Warsaw", "wrestling", "freestyle", null, 3, null, null,
             [Win(FightMethod.Points), Win(FightMethod.Pin, "pin_fall"), Loss(FightMethod.Points)]),
         new(60, "Sub-Only Superfight Night", "Wrocław", "bjj", "nogi", "Purple", null, "Superfight", null,
