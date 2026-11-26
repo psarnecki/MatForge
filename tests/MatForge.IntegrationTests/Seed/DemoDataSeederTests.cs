@@ -13,6 +13,8 @@ namespace MatForge.IntegrationTests.Seed;
 [Collection("Database")]
 public class DemoDataSeederTests(DatabaseFixture fixture)
 {
+    private static readonly DateOnly Today = DateOnly.FromDateTime(DateTime.Now);
+
     [Fact]
     public async Task Start_with_demo_data_creates_the_demo_user_who_can_log_in()
     {
@@ -30,7 +32,9 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         profile["firstName"]!.GetValue<string>().Should().Be("Alex");
         profile["clubs"]!.AsArray().Should().HaveCount(3);
         profile["belts"]!.AsArray().Should().ContainSingle();
-        (await CountDemoRowsAsync())["Sessions"].Should().BeGreaterThan(1000);
+        var rows = await CountDemoRowsAsync();
+        rows["Sessions"].Should().BeGreaterThan(1000);
+        rows["Rounds"].Should().BeGreaterThan(3000);
     }
 
     [Fact]
@@ -86,12 +90,68 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         errors.Should().BeEmpty();
     }
 
+    // Tests the 90-day window ending on each of the last 7 days to cover every weekday
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task Last_90_days_show_every_training_rule_except_a_decline(int daysBeforeToday)
+    {
+        await EnsureDemoUserAsync();
+        var to = Today.AddDays(-daysBeforeToday);
+
+        var training = (await GetDemoInsightsAsync(to.AddDays(-89), to))["training"]!;
+
+        training["status"]!.GetValue<string>().Should().Be("Ok");
+        var items = Items(training);
+        items.Should().Contain(i => i.StartsWith("Strength ")).And.Contain(i => i.StartsWith("Weakness "));
+        items.Should().Contain([
+            "Strength DominantFinisherTechnique Rear Naked Choke",
+            "Strength DominantFinisherCategory Choke",
+            "Weakness RecurringLossTechnique Inside Heel Hook",
+            "Weakness RecurringLossCategory Leg Lock",
+            "Strength StrongPosition Back Control",
+            "Weakness VulnerablePosition Saddle / Cross Ashi",
+            "Trend ImprovingWinRate "
+        ]);
+        items.Should().NotContain(i => i.Contains("DecliningWinRate"));
+    }
+
+    [Fact]
+    public async Task Weeks_after_the_injury_show_a_declining_training_win_rate()
+    {
+        await EnsureDemoUserAsync();
+        var endWeekMonday = Today.AddDays(-(((int)Today.DayOfWeek + 6) % 7));
+
+        var training = (await GetDemoInsightsAsync(endWeekMonday.AddDays(-21 * 7), endWeekMonday.AddDays(-16 * 7 + 6)))["training"]!;
+
+        Items(training).Should().Contain("Trend DecliningWinRate ");
+    }
+
     // Starts the API with Seed:DemoData=true (migrations, dictionaries, then demo data)
     private async Task StartWithDemoDataAsync()
     {
         await using var factory = fixture.ApiFactory.WithWebHostBuilder(builder => builder.UseSetting("Seed:DemoData", "true"));
         _ = factory.Server;
     }
+
+    private async Task<JsonNode> GetDemoInsightsAsync(DateOnly from, DateOnly to)
+    {
+        var client = fixture.ApiFactory.CreateClient();
+        (await client.PostAsJsonAsync("/api/auth/login?useCookies=true",
+            new { email = DemoDataSeeder.Email, password = "Demo1234!" })).EnsureSuccessStatusCode();
+        return JsonNode.Parse(await client.GetStringAsync($"/api/analytics/insights?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}"))!;
+    }
+
+    // Each insight's type, rule and parameter name (empty for trends)
+    private static List<string> Items(JsonNode side) =>
+        side["items"]!.AsArray()
+            .Select(i => $"{i!["type"]!.GetValue<string>()} {i["rule"]!.GetValue<string>()} {i["params"]!["name"]?.GetValue<string>()}")
+            .ToList();
 
     private async Task<Guid> EnsureDemoUserAsync()
     {
