@@ -107,32 +107,34 @@ Optional filters `disciplineId`, `formatId` restrict to matching grappling sessi
 }
 ```
 
-- A competition belongs to the period by its `Date`. The optional `disciplineId` / `formatId` filters apply to the competition's own discipline and format.
+- A competition belongs to the period by its `Date`. The optional `disciplineId` / `formatId` filters apply to the competition's own discipline and format. A competition without fights still counts in `competitions`, in the medals, and in the timeline (with 0 fights); a future competition inside the period counts too (D-45).
 - `winRate = wins / fights` (draws stay in the denominator, as in sparring).
-- `methods.wins/losses`: distribution of `Method` among won/lost fights; `share = count / wins` (or `/ losses`).
+- `methods.wins/losses`: distribution of `Method` among won/lost fights; `share = count / wins` (or `/ losses`). Ordered like every list: `count` descending, then the method name (section 2). Draws have no method.
 - `finishesFor.total` = won fights with a technique (`Method` is `Submission`, `Throw`, or `Pin`); `finishesAgainst.total` analogously for lost fights. Technique and category shares use these totals.
 - Medal counts are derived from `Place` (1 = gold, 2 = silver, 3 = bronze); other places and `null` count as no medal.
+- `timeline`: one entry per competition in the period, oldest first: `date` ascending, then `competitionId` ascending (D-45).
 - `winRateDelta` rule as in section 4, with `MinSamples` of the competition profile.
 
 ## 6. Insights (`GET /api/analytics/insights`)
 
 ```json
 {
-  "training":    { "status": "Ok", "items": [ { "rule": "DominantFinisherTechnique", "type": "Strength",
+  "training":    { "status": "Ok", "samples": 20, "minSamples": 10,
+                   "items": [ { "rule": "DominantFinisherTechnique", "type": "Strength",
                     "params": { "id": 1, "name": "Rear Naked Choke", "count": 4, "share": 0.5 } } ] },
-  "competition": { "status": "InsufficientData", "items": [] },
+  "competition": { "status": "InsufficientData", "samples": 3, "minSamples": 5, "items": [] },
   "comparison":  [ { "rule": "CompetitionVsTrainingGap", "type": "Info",
                      "params": { "trainingWinRate": 0.6, "competitionWinRate": 0.3, "delta": -0.3 } } ]
 }
 ```
 
-- `status` is `InsufficientData` (and `items` empty) when the sample is smaller than `MinSamples`; otherwise `Ok` (possibly with no items).
+- `status` is `InsufficientData` (and `items` empty) when the sample is smaller than `MinSamples`; otherwise `Ok` (possibly with no items). `samples` is the number of rounds (training) or fights (competition) in the period and `minSamples` the threshold of that profile, so the UI can say what is missing (D-45).
 - Each insight: `rule` (code), `type` (`Strength`, `Weakness`, `Trend`, `Info`), `params` (object). **No text**: the UI builds the sentences from `rule` + `params` (in `texts.ts`).
 - Insights are computed **separately** for training (the sparring data) and competitions (the fights data). The optional `disciplineId` / `formatId` filters apply to both sides, so the comparison always uses matching data.
 
 ### Thresholds
 
-Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound to one typed options class. Never hard-coded in rule classes. The class (`AnalyticsRulesOptions`, created in T11 with `Training.MinSamples` and extended in T12) is validated at startup: `MinSamples` below 1 stops the app (D-44).
+Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound to one typed options class. Never hard-coded in rule classes. The class (`AnalyticsRulesOptions`, created in T11 with `Training.MinSamples` and extended in T12) is validated at startup: a count (`MinSamples`, `MinFinishes`, `MinCount`) below 1, or a share or delta that is not above 0 and at most 1, stops the app (D-44, D-45). `PositionShare` exists only in the `Training` profile; `GapDelta` compares both sides, so it sits next to the profiles (`Analytics:Rules:GapDelta`).
 
 | Setting | Training | Competition | Meaning |
 |---|---|---|---|
@@ -158,7 +160,7 @@ Stored in configuration (`appsettings.json`, section `Analytics:Rules`), bound t
 | `DecliningWinRate` | Trend | `winRateDelta ≤ -TrendDelta` | same | 1 |
 | `CompetitionVsTrainingGap` | Info | Both sides `status = Ok` and `abs(compWinRate - trainWinRate) ≥ GapDelta` | `trainingWinRate, competitionWinRate, delta` (`comp - train`) | 1 (in `comparison`) |
 
-Selection among candidates: highest `share`, then highest `count`, then name ascending. "Other" entries are skipped (section 2). The concept's "dominant action types" are covered by `DominantFinisherCategory` and by the `byCategory` and `byPosition` distributions.
+Selection among candidates: highest `share`, then highest `count`, then name ascending, then `id`. "Other" entries are skipped (section 2): they are removed before the thresholds and the limit are applied, but still count in `total` and `recorded`. Thresholds are compared with the values as returned (shares, `winRateDelta`, and the gap `delta`, each rounded to 4 decimals); the gap `delta` is computed from the unrounded rates and rounded once, like `winRateDelta`. Items in each section follow the catalog order, then the selection order (D-45). The concept's "dominant action types" are covered by `DominantFinisherCategory` and by the `byCategory` and `byPosition` distributions.
 
 ## 7. Reference numbers
 
@@ -207,7 +209,7 @@ See section 8; cases are listed there.
 
 ### GT-06: Competitions
 
-Fights: 9 over 3 competitions; 5 wins (3 by Submission with technique, 1 Points, 1 Decision), 4 losses (1 by Submission with technique, 3 Points). Expected: `winRate` 0.5556; `methods.wins`: Submission 3 (0.6), Points 1 (0.2), Decision 1 (0.2); `methods.losses`: Points 3 (0.75), Submission 1 (0.25); `finishesFor.total` 3; `finishesAgainst.total` 1.
+Fights: 9 over 3 competitions; 5 wins (3 by Submission with technique, 1 Points, 1 Decision), 4 losses (1 by Submission with technique, 3 Points). Expected (lists in the order of section 2): `winRate` 0.5556; `methods.wins`: Submission 3 (0.6), Decision 1 (0.2), Points 1 (0.2); `methods.losses`: Points 3 (0.75), Submission 1 (0.25); `finishesFor.total` 3; `finishesAgainst.total` 1.
 
 ## 8. Goals: computed fields
 
