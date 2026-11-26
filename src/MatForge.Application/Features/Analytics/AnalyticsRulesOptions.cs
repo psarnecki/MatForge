@@ -16,7 +16,7 @@ public class AnalyticsRulesOptions
 
 public class RuleThresholds
 {
-    // Rounds needed in both periods for a win rate change
+    // Rounds or fights needed for any insight and in both periods for a win rate change
     public int MinSamples { get; init; }
 
     // Finishes in the block for technique and category rules, recorded positions for position rules
