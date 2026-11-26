@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using FluentAssertions;
+using MatForge.Application.Features.Competitions;
 using MatForge.Application.Features.Sessions;
 using MatForge.Data.Entities;
 using MatForge.Data.Seed;
@@ -35,6 +36,7 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         var rows = await CountDemoRowsAsync();
         rows["Sessions"].Should().BeGreaterThan(1000);
         rows["Rounds"].Should().BeGreaterThan(3000);
+        rows["Competitions"].Should().BeGreaterThan(20);
     }
 
     [Fact]
@@ -63,6 +65,16 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         Layout(dictionary, monday.AddDays(9)).Should().Equal(wednesday);
         wednesday.Should().Equal(sunday.Where(s => s.Day <= 2));
         Layout(dictionary, monday).Should().Equal(sunday.Where(s => s.Day <= 0));
+
+        var competitions = CompetitionLayout(dictionary, monday.AddDays(2));
+        CompetitionLayout(dictionary, monday.AddDays(9)).Should().Equal(competitions);
+        CompetitionLayout(dictionary, monday).Should().Equal(competitions);
+        CompetitionLayout(dictionary, monday.AddDays(6)).Should().Equal(competitions);
+
+        // The injury note is on Monday of week 24 and the comeback note on Wednesday of week 21
+        DemoDataGenerator.Generate(monday, dictionary).Sessions.Where(s => s.Notes != null)
+            .Select(s => s.Date.DayNumber - monday.DayNumber)
+            .Should().Equal(-24 * 7, -21 * 7 + 2);
     }
 
     [Fact]
@@ -90,6 +102,31 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         errors.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task Every_demo_competition_passes_the_competition_validators()
+    {
+        var userId = await EnsureDemoUserAsync();
+        await using var db = fixture.CreateDbContext(userId);
+        var competitions = await db.Competitions.AsNoTracking()
+            .Include(c => c.Fights.OrderBy(f => f.Order))
+            .OrderBy(c => c.Date).ThenBy(c => c.Id)
+            .ToListAsync();
+        var validator = new CompetitionRequestValidator(db);
+
+        var errors = new List<string>();
+        foreach (var competition in competitions)
+        {
+            var request = ToRequest(competition);
+            errors.AddRange(DataAnnotationErrors(request).Concat(request.Fights.SelectMany(DataAnnotationErrors))
+                .Select(error => $"{competition.Date}: {error}"));
+            var result = await validator.ValidateAsync(request);
+            errors.AddRange(result.Errors.Select(error => $"{competition.Date} {error.PropertyName}: {error.ErrorMessage}"));
+        }
+
+        competitions.Should().NotBeEmpty();
+        errors.Should().BeEmpty();
+    }
+
     // Tests the 90-day window ending on each of the last 7 days to cover every weekday
     [Theory]
     [InlineData(0)]
@@ -107,7 +144,7 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         var training = (await GetDemoInsightsAsync(to.AddDays(-89), to))["training"]!;
 
         training["status"]!.GetValue<string>().Should().Be("Ok");
-        var items = Items(training);
+        var items = Items(training["items"]!);
         items.Should().Contain(i => i.StartsWith("Strength ")).And.Contain(i => i.StartsWith("Weakness "));
         items.Should().Contain([
             "Strength DominantFinisherTechnique Rear Naked Choke",
@@ -121,6 +158,33 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
         items.Should().NotContain(i => i.Contains("DecliningWinRate"));
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task Last_90_days_show_competition_strengths_weaknesses_decline_and_the_gap(int daysBeforeToday)
+    {
+        await EnsureDemoUserAsync();
+        var to = Today.AddDays(-daysBeforeToday);
+
+        var insights = await GetDemoInsightsAsync(to.AddDays(-89), to);
+
+        var competition = insights["competition"]!;
+        competition["status"]!.GetValue<string>().Should().Be("Ok");
+        competition["samples"]!.GetValue<int>().Should().Be(8);
+        Items(competition["items"]!).Should().Equal(
+            "Strength DominantFinisherTechnique Rear Naked Choke",
+            "Strength DominantFinisherCategory Choke",
+            "Weakness RecurringLossTechnique Inside Heel Hook",
+            "Weakness RecurringLossCategory Leg Lock",
+            "Trend DecliningWinRate ");
+        Items(insights["comparison"]!).Should().Equal("Info CompetitionVsTrainingGap ");
+    }
+
     [Fact]
     public async Task Weeks_after_the_injury_show_a_declining_training_win_rate()
     {
@@ -129,7 +193,7 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
 
         var training = (await GetDemoInsightsAsync(endWeekMonday.AddDays(-21 * 7), endWeekMonday.AddDays(-16 * 7 + 6)))["training"]!;
 
-        Items(training).Should().Contain("Trend DecliningWinRate ");
+        Items(training["items"]!).Should().Contain("Trend DecliningWinRate ");
     }
 
     // Starts the API with Seed:DemoData=true (migrations, dictionaries, then demo data)
@@ -148,8 +212,8 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
     }
 
     // Each insight's type, rule and parameter name (empty for trends)
-    private static List<string> Items(JsonNode side) =>
-        side["items"]!.AsArray()
+    private static List<string> Items(JsonNode items) =>
+        items.AsArray()
             .Select(i => $"{i!["type"]!.GetValue<string>()} {i["rule"]!.GetValue<string>()} {i["params"]!["name"]?.GetValue<string>()}")
             .ToList();
 
@@ -196,6 +260,38 @@ public class DemoDataSeederTests(DatabaseFixture fixture)
                 string.Join(",", s.Rounds.Select(r => $"{r.Result}/{r.TechniqueId}/{r.PositionId}"))))
             .ToList();
     }
+
+    // Each competition as its day counted from the Monday of the end week, followed by its fields and fights
+    private static List<string> CompetitionLayout(DemoDictionary dictionary, DateOnly endDate)
+    {
+        var monday = endDate.AddDays(-(((int)endDate.DayOfWeek + 6) % 7));
+        return DemoDataGenerator.Generate(endDate, dictionary).Competitions
+            .Select(c => $"{c.Date.DayNumber - monday.DayNumber} {c.Name} {c.DisciplineId} {c.FormatId} {c.Place} {c.ResultNote} " +
+                string.Join(",", c.Fights.Select(f => $"{f.Result}/{f.Method}/{f.TechniqueId}/{f.DurationSeconds}/{f.OpponentName}")))
+            .ToList();
+    }
+
+    private static CompetitionRequest ToRequest(Competition competition) => new()
+    {
+        Name = competition.Name,
+        Date = competition.Date,
+        Location = competition.Location,
+        DisciplineId = competition.DisciplineId,
+        FormatId = competition.FormatId,
+        AgeCategory = competition.AgeCategory,
+        SkillLevel = competition.SkillLevel,
+        WeightCategory = competition.WeightCategory,
+        Place = competition.Place,
+        ResultNote = competition.ResultNote,
+        Notes = competition.Notes,
+        Fights = competition.Fights
+            .Select(f => new FightRequest
+            {
+                OpponentName = f.OpponentName, Result = f.Result, Method = f.Method, TechniqueId = f.TechniqueId,
+                DurationSeconds = f.DurationSeconds, Notes = f.Notes
+            })
+            .ToList()
+    };
 
     private static SessionRequest ToRequest(TrainingSession session) => new()
     {
