@@ -1,6 +1,9 @@
 using System.Globalization;
 using FluentValidation;
+using MatForge.Application.Common;
 using MatForge.Application.Features.Analytics.Calculators;
+using MatForge.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatForge.Application.Features.Analytics;
 
@@ -54,11 +57,42 @@ public class AnalyticsQueryValidator : AbstractValidator<AnalyticsQuery>
     private static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 }
 
-// Uses the same period rules, while filters are not validated yet
+// Uses the same period rules and checks the filters against the dictionaries
 public class AnalyticsFilterQueryValidator : AbstractValidator<AnalyticsFilterQuery>
 {
-    public AnalyticsFilterQueryValidator()
+    public AnalyticsFilterQueryValidator(AppDbContext db)
     {
         Include(new AnalyticsQueryValidator());
+
+        // The discipline exists
+        RuleFor(q => q.DisciplineId).CustomAsync(async (disciplineId, context, cancellationToken) =>
+        {
+            if (disciplineId != null && !await db.Disciplines.AnyAsync(d => d.Id == disciplineId, cancellationToken))
+            {
+                context.AddFailure("Choose a discipline.");
+            }
+        });
+
+        // The format exists, and belongs to the discipline when both are given
+        RuleFor(q => q.FormatId).CustomAsync(async (formatId, context, cancellationToken) =>
+        {
+            if (formatId == null)
+            {
+                return;
+            }
+
+            var disciplineId = context.InstanceToValidate.DisciplineId;
+            if (disciplineId == null)
+            {
+                if (!await db.DisciplineFormats.AnyAsync(f => f.Id == formatId, cancellationToken))
+                {
+                    context.AddFailure("Choose a format.");
+                }
+            }
+            else if (!await DisciplineRules.FormatBelongsToDisciplineAsync(db, formatId.Value, disciplineId.Value, cancellationToken))
+            {
+                context.AddFailure("Choose a format of this discipline.");
+            }
+        });
     }
 }
