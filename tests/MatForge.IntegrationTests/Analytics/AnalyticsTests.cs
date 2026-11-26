@@ -174,19 +174,13 @@ public class AnalyticsTests(DatabaseFixture fixture)
     [Fact]
     public async Task Overview_ignores_another_users_data()
     {
-        var user = await fixture.CreateLoggedInUserAsync();
-        var otherUser = await fixture.CreateLoggedInUserAsync();
-        var ids = await IdsAsync();
-        await CreateSessionAsync(user, Other(ids, Iso(Today.AddDays(-40))));
-        await CreateSessionAsync(otherUser, Other(ids, Iso(Today.AddDays(-200))));
-        await CreateSessionAsync(otherUser, Grappling(ids, Iso(Today.AddDays(-20)), ids.Gi, null));
-        await CreateCompetitionAsync(otherUser, ids, Today.AddDays(-300));
+        var (user, ids, _) = await CreateUsersWithSeparateDataAsync();
 
         var overview = await GetOverviewAsync(user, "");
 
-        overview.Period.From.Should().Be(Today.AddDays(-40));
+        overview.Period.Should().Be(new PeriodDto(Today.AddDays(-30), Today, 31));
         overview.Sessions.Count.Should().Be(1);
-        overview.ByDiscipline.Should().BeEmpty();
+        overview.ByDiscipline.Should().Equal(new SessionGroupDto(ids.Bjj, "Brazilian Jiu-Jitsu", 1, 90, 1m));
     }
 
     [Fact]
@@ -328,16 +322,16 @@ public class AnalyticsTests(DatabaseFixture fixture)
     [Fact]
     public async Task Sparring_ignores_another_users_rounds()
     {
-        var user = await fixture.CreateLoggedInUserAsync();
-        var otherUser = await fixture.CreateLoggedInUserAsync();
-        var ids = await IdsAsync();
-        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Round("Win")));
-        await CreateSessionAsync(otherUser, Sparring(ids, "2026-09-10", Round("Loss"), Round("Loss")));
-        await CreateSessionAsync(otherUser, Sparring(ids, "2026-08-10", Round("Loss")));
+        var (user, ids, _) = await CreateUsersWithSeparateDataAsync();
 
-        var sparring = await GetSparringAsync(user, "from=2026-09-01&to=2026-09-30");
+        var sparring = await GetSparringAsync(user, "");
 
-        sparring.Totals.Should().Be(new RoundTotalsDto(1, 1, 0, 0, 1m, 1));
+        sparring.Totals.Should().Be(new RoundTotalsDto(2, 1, 1, 0, 0.5m, 0));
+        sparring.FinishesFor.ByTechnique.Select(i => (i.Id, i.Count)).Should().Equal((ids.Armbar, 1));
+        sparring.FinishesFor.ByPosition.Items.Select(i => (i.Id, i.Count)).Should().Equal((ids.Mount, 1));
+        sparring.FinishesAgainst.ByTechnique.Select(i => (i.Id, i.Count)).Should().Equal((ids.Rnc, 1));
+        sparring.FinishesAgainst.ByPosition.Items.Select(i => (i.Id, i.Count)).Should().Equal((ids.BackControl, 1));
+        sparring.Trend.Points.Sum(p => p.Rounds).Should().Be(2);
         sparring.Trend.Previous.Rounds.Should().Be(0);
     }
 
@@ -524,16 +518,14 @@ public class AnalyticsTests(DatabaseFixture fixture)
     [Fact]
     public async Task Competitions_ignore_another_users_data()
     {
-        var user = await fixture.CreateLoggedInUserAsync();
-        var otherUser = await fixture.CreateLoggedInUserAsync();
-        var ids = await IdsAsync();
-        await CreateCompetitionAsync(user, ids, "2026-09-10", Fight("Win", "Points"));
-        await CreateCompetitionAsync(otherUser, ids, Date("2026-09-10"), place: 1, fights: Fights(0, 2));
-        await CreateCompetitionAsync(otherUser, ids, "2026-08-10", Fight("Loss", "Points"));
+        var (user, ids, competitionId) = await CreateUsersWithSeparateDataAsync();
 
-        var competitions = await GetCompetitionsAsync(user, "from=2026-09-01&to=2026-09-30");
+        var competitions = await GetCompetitionsAsync(user, "");
 
-        competitions.Totals.Should().Be(new FightTotalsDto(1, 1, 1, 0, 0, 1m, 0, 0, 0));
+        competitions.Totals.Should().Be(new FightTotalsDto(1, 2, 1, 1, 0, 0.5m, 0, 0, 0));
+        competitions.FinishesFor.ByTechnique.Select(i => (i.Id, i.Count)).Should().Equal((ids.Armbar, 1));
+        competitions.FinishesAgainst.Total.Should().Be(0);
+        competitions.Timeline.Select(t => t.CompetitionId).Should().Equal(competitionId);
         competitions.Previous.Fights.Should().Be(0);
     }
 
@@ -704,18 +696,15 @@ public class AnalyticsTests(DatabaseFixture fixture)
     [Fact]
     public async Task Insights_ignore_another_users_data()
     {
-        var user = await fixture.CreateLoggedInUserAsync();
-        var otherUser = await fixture.CreateLoggedInUserAsync();
-        var ids = await IdsAsync();
-        await CreateSessionAsync(user, Sparring(ids, "2026-09-10", Rounds(9, 0)));
-        await CreateSessionAsync(otherUser, Sparring(ids, "2026-09-10", Rounds(5, 5)));
-        await CreateCompetitionAsync(otherUser, ids, "2026-09-12", Fights(5, 0));
+        var (user, _, _) = await CreateUsersWithSeparateDataAsync();
 
-        var json = await GetJsonAsync(user, "/api/analytics/insights?from=2026-09-01&to=2026-09-30");
+        var json = await GetJsonAsync(user, "/api/analytics/insights");
 
-        json["training"]!["samples"]!.GetValue<int>().Should().Be(9);
+        json["training"]!["samples"]!.GetValue<int>().Should().Be(2);
         json["training"]!["status"]!.GetValue<string>().Should().Be("InsufficientData");
-        json["competition"]!["samples"]!.GetValue<int>().Should().Be(0);
+        json["competition"]!["samples"]!.GetValue<int>().Should().Be(2);
+        json["competition"]!["status"]!.GetValue<string>().Should().Be("InsufficientData");
+        json["comparison"]!.AsArray().Should().BeEmpty();
     }
 
     [Fact]
@@ -955,6 +944,32 @@ public class AnalyticsTests(DatabaseFixture fixture)
 
     private static object[] Fights(int wins, int losses) =>
         [..Enumerable.Repeat(Fight("Win", "Points"), wins), ..Enumerable.Repeat(Fight("Loss", "Points"), losses)];
+
+    // The other user has earlier data, data in the previous period and enough samples for both insight sides
+    private async Task<(LoggedInUser User, DictionaryIds Ids, int CompetitionId)> CreateUsersWithSeparateDataAsync()
+    {
+        var user = await fixture.CreateLoggedInUserAsync();
+        var otherUser = await fixture.CreateLoggedInUserAsync();
+        var ids = await IdsAsync();
+
+        await CreateSessionAsync(user, Sparring(ids, Iso(Today.AddDays(-30)),
+            Round("Win", ids.Armbar, ids.Mount), Round("Loss", ids.Rnc, ids.BackControl)));
+        var competitionId = await CreateCompetitionAsync(user, ids, Today.AddDays(-20),
+            fights: [Fight("Win", "Submission", ids.Armbar), Fight("Loss", "Points")]);
+
+        await CreateSessionAsync(otherUser, Other(ids, Iso(Today.AddDays(-400))));
+        await CreateCompetitionAsync(otherUser, ids, Today.AddDays(-500), fights: Fights(1, 1));
+        await CreateSessionAsync(otherUser, Sparring(ids, Iso(Today.AddDays(-35)), Rounds(2, 1)));
+        await CreateCompetitionAsync(otherUser, ids, Today.AddDays(-40), fights: Fights(1, 0));
+        await CreateSessionAsync(otherUser, Sparring(ids, Iso(Today.AddDays(-10)),
+            [..Enumerable.Repeat(Round("Win", ids.Rnc, ids.BackControl), 10), Round("Loss", ids.Armbar, ids.Mount)]));
+        await CreateSessionAsync(otherUser, Grappling(ids, Iso(Today.AddDays(-12)), ids.Freestyle, null,
+            disciplineId: ids.Wrestling));
+        await CreateCompetitionAsync(otherUser, ids, Today.AddDays(-5), place: 1,
+            fights: [..Fights(5, 0), Fight("Loss", "Submission", ids.Rnc)]);
+
+        return (user, ids, competitionId);
+    }
 
     private static DateOnly Date(string value) => DateOnly.Parse(value, CultureInfo.InvariantCulture);
 
