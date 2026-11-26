@@ -94,3 +94,29 @@ public record FightFinishesDto(int Total, List<FinishGroupDto> ByTechnique, List
 public record TimelineItemDto(int CompetitionId, DateOnly Date, string Name, int? Place, int Fights, int Wins, int Losses);
 
 public record PreviousFightsDto(int Fights, decimal? WinRate);
+
+public record InsightsDto(SideInsightsDto Training, SideInsightsDto Competition, List<InsightDto> Comparison);
+
+// Samples are the rounds or fights in the period, items are empty with too few samples
+public record SideInsightsDto(InsightStatus Status, int Samples, int MinSamples, List<InsightDto> Items);
+
+// The UI builds the sentence from the rule code and its params
+public record InsightDto(string Rule, InsightType Type, object Params);
+
+public record WinRateChangeDto(decimal WinRate, decimal PreviousWinRate, decimal Delta);
+
+public record WinRateGapDto(decimal TrainingWinRate, decimal CompetitionWinRate, decimal Delta);
+
+public enum InsightStatus
+{
+    Ok,
+    InsufficientData
+}
+
+public enum InsightType
+{
+    Strength,
+    Weakness,
+    Trend,
+    Info
+}
