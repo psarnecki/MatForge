@@ -4,7 +4,8 @@ using MatForge.Data.Enums;
 namespace MatForge.Data.Seed;
 
 // Weekly timetables of the demo athlete, one per phase of the story
-internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyDictionary<string, Club> clubs)
+internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyDictionary<string, Club> clubs,
+    DemoRounds rounds)
 {
     public const string NorthSide = "North Side BJJ";
     public const string Riverside = "Riverside Grappling";
@@ -95,7 +96,7 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
             var planned = random.Pick(slot.Options);
             var date = monday.AddDays(((int)slot.Day + 6) % 7);
             var minutes = planned.Minutes + 15 * random.Next(-1, 2);
-            sessions.Add(Create(planned, date, minutes, random.Pick(feelings)));
+            sessions.Add(Create(planned, date, minutes, random.Pick(feelings), weeksBack));
         }
 
         return sessions;
@@ -110,7 +111,7 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
         _ => FullWeek
     };
 
-    private TrainingSession Create(Planned planned, DateOnly date, int minutes, int feeling) =>
+    private TrainingSession Create(Planned planned, DateOnly date, int minutes, int feeling, int weeksBack) =>
         planned.Activity == null
             ? new TrainingSession
             {
@@ -118,7 +119,8 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
                 DisciplineId = dictionary.Disciplines[planned.Discipline!],
                 FormatId = dictionary.Formats[(planned.Discipline!, planned.Format!)],
                 CharacterId = dictionary.Characters[planned.Character!],
-                Club = planned.Club == null ? null : clubs[planned.Club]
+                Club = planned.Club == null ? null : clubs[planned.Club],
+                Rounds = rounds.For(planned.Discipline!, planned.Format!, planned.Character!, weeksBack)
             }
             : new TrainingSession
             {

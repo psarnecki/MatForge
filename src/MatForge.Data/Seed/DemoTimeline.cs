@@ -24,5 +24,5 @@ internal static class DemoTimeline
     };
 
     // Two weeks off each year and one more week six months later, all before the injury
-    private static bool IsHoliday(int weeksBack) => weeksBack >= 27 && (weeksBack - 27) % 52 is 0 or 1 or 26;
+    private static bool IsHoliday(int weeksBack) => weeksBack >= 30 && (weeksBack - 30) % 52 is 0 or 1 or 26;
 }

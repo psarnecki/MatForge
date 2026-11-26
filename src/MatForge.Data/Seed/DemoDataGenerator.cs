@@ -16,7 +16,8 @@ public static class DemoDataGenerator
         var clubs = new[] { DemoWeekPlan.NorthSide, DemoWeekPlan.Riverside, DemoWeekPlan.CityWrestling }
             .Select(name => new Club { Name = name })
             .ToList();
-        var weekPlan = new DemoWeekPlan(random, dictionary, clubs.ToDictionary(c => c.Name));
+        var weekPlan = new DemoWeekPlan(random, dictionary, clubs.ToDictionary(c => c.Name),
+            new DemoRounds(random, dictionary));
 
         var endWeekMonday = endDate.AddDays(-(((int)endDate.DayOfWeek + 6) % 7));
         var sessions = new List<TrainingSession>();
