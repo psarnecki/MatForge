@@ -39,3 +39,6 @@ public record FightRow(
     string? TechniqueName,
     int? CategoryId,
     string? CategoryName);
+
+// Dictionary entries included in distributions but excluded from insight rules
+public record OtherEntries(int TechniqueId, int CategoryId, int PositionId);
