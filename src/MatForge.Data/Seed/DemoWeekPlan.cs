@@ -17,6 +17,13 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
     private static readonly (int Feeling, int Weight)[] Feelings = [(2, 5), (3, 25), (4, 45), (5, 25)];
     private static readonly (int Feeling, int Weight)[] LowFeelings = [(2, 10), (3, 50), (4, 30), (5, 10)];
 
+    // Notes that tell the story of the injury, by week and weekday
+    private static readonly Dictionary<(int WeeksBack, DayOfWeek Day), string> StoryNotes = new()
+    {
+        [(24, DayOfWeek.Monday)] = "Knee rehab after the Warsaw No-Gi Open, no grappling for three weeks.",
+        [(21, DayOfWeek.Wednesday)] = "First sparring after the knee injury, still careful with leg locks."
+    };
+
     // Mostly gi, no wrestling yet
     private static readonly Slot[] BlueWeek =
     [
@@ -80,7 +87,8 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
         One(DayOfWeek.Saturday, 0.4, Other("cycling", 75))
     ];
 
-    public List<TrainingSession> Sessions(int weeksBack, DateOnly monday)
+    // A competition takes the place of the Saturday session
+    public List<TrainingSession> Sessions(int weeksBack, DateOnly monday, bool competing)
     {
         var phase = DemoTimeline.PhaseOf(weeksBack);
         var feelings = phase is DemoPhase.Injury or DemoPhase.Comeback ? LowFeelings : Feelings;
@@ -88,7 +96,7 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
 
         foreach (var slot in Timetable(phase))
         {
-            if (!random.Chance(slot.Chance))
+            if ((competing && slot.Day == DayOfWeek.Saturday) || !random.Chance(slot.Chance))
             {
                 continue;
             }
@@ -96,7 +104,9 @@ internal class DemoWeekPlan(Random random, DemoDictionary dictionary, IReadOnlyD
             var planned = random.Pick(slot.Options);
             var date = monday.AddDays(((int)slot.Day + 6) % 7);
             var minutes = planned.Minutes + 15 * random.Next(-1, 2);
-            sessions.Add(Create(planned, date, minutes, random.Pick(feelings), weeksBack));
+            var session = Create(planned, date, minutes, random.Pick(feelings), weeksBack);
+            session.Notes = StoryNotes.GetValueOrDefault((weeksBack, slot.Day));
+            sessions.Add(session);
         }
 
         return sessions;

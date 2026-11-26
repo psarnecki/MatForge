@@ -16,15 +16,28 @@ public static class DemoDataGenerator
         var clubs = new[] { DemoWeekPlan.NorthSide, DemoWeekPlan.Riverside, DemoWeekPlan.CityWrestling }
             .Select(name => new Club { Name = name })
             .ToList();
-        var weekPlan = new DemoWeekPlan(random, dictionary, clubs.ToDictionary(c => c.Name),
-            new DemoRounds(random, dictionary));
+        var rounds = new DemoRounds(random, dictionary);
+        var weekPlan = new DemoWeekPlan(random, dictionary, clubs.ToDictionary(c => c.Name), rounds);
+        var competitionPlan = new DemoCompetitions(random, dictionary, rounds);
 
         var endWeekMonday = endDate.AddDays(-(((int)endDate.DayOfWeek + 6) % 7));
         var sessions = new List<TrainingSession>();
+        var competitions = new List<Competition>();
         for (var weeksBack = Weeks - 1; weeksBack >= 0; weeksBack--)
         {
-            sessions.AddRange(weekPlan.Sessions(weeksBack, endWeekMonday.AddDays(-7 * weeksBack)));
+            var monday = endWeekMonday.AddDays(-7 * weeksBack);
+            var competition = competitionPlan.ForWeek(weeksBack, monday.AddDays(5));
+            if (competition != null)
+            {
+                competitions.Add(competition);
+            }
+
+            sessions.AddRange(weekPlan.Sessions(weeksBack, monday, competition != null));
         }
+
+        // The next competition is already planned, a few weeks after the end date
+        var upcomingSaturday = endWeekMonday.AddDays(7 * DemoCompetitions.UpcomingWeeks + 5);
+        competitions.Add(competitionPlan.ForWeek(-DemoCompetitions.UpcomingWeeks, upcomingSaturday)!);
 
         // The whole last week is drawn first, so dropping the days after the end date moves nothing before it
         sessions.RemoveAll(s => s.Date > endDate);
@@ -34,6 +47,6 @@ public static class DemoDataGenerator
             DisciplineId = dictionary.Disciplines["bjj"], BeltId = dictionary.Belts[("bjj", "brown")], Degree = 0
         };
 
-        return new DemoData(clubs, [belt], sessions, []);
+        return new DemoData(clubs, [belt], sessions, competitions);
     }
 }

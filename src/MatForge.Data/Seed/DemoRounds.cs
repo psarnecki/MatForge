@@ -118,7 +118,7 @@ internal class DemoRounds(Random random, DemoDictionary dictionary)
     }
 
     // Grows slowly over the blue and purple years, drops after the injury and peaks at brown belt
-    private static double WinChance(DemoPhase phase, int weeksBack) => phase switch
+    public static double WinChance(DemoPhase phase, int weeksBack) => phase switch
     {
         DemoPhase.Blue => 0.32 + 0.13 * (259 - weeksBack) / 99.0,
         DemoPhase.Comeback => 0.34,
@@ -135,10 +135,7 @@ internal class DemoRounds(Random random, DemoDictionary dictionary)
             return round;
         }
 
-        var finishes = FinishesFor(result, discipline, format, phase)
-            .Where(f => format == "gi" || !GiOnly.Contains(f.Finish.Technique))
-            .ToList();
-        var finish = random.Pick(finishes);
+        var finish = PickFinish(result, discipline, format, phase);
         round.TechniqueId = dictionary.Techniques[finish.Technique];
 
         if (random.Chance(finish.PositionChance))
@@ -148,6 +145,15 @@ internal class DemoRounds(Random random, DemoDictionary dictionary)
 
         return round;
     }
+
+    // Competition submissions come from the same tables as the BJJ rounds
+    public string PickTechnique(bool won, string format, DemoPhase phase) =>
+        PickFinish(won ? RoundResult.Win : RoundResult.Loss, "bjj", format, phase).Technique;
+
+    private Finish PickFinish(RoundResult result, string discipline, string format, DemoPhase phase) =>
+        random.Pick(FinishesFor(result, discipline, format, phase)
+            .Where(f => format == "gi" || !GiOnly.Contains(f.Finish.Technique))
+            .ToList());
 
     private static (Finish Finish, int Weight)[] FinishesFor(RoundResult result, string discipline, string format,
         DemoPhase phase) =>
