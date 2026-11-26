@@ -52,6 +52,41 @@ public class AnalyticsService(AppDbContext db, IOptions<AnalyticsRulesOptions> o
         return SparringCalculator.Calculate(period, rows, options.Value.Training.MinSamples);
     }
 
+    // For GET /api/analytics/competitions (one query loads competitions from the current and previous periods, including their fights)
+    public async Task<CompetitionAnalyticsDto> GetCompetitionsAsync(AnalyticsFilterQuery query,
+        CancellationToken cancellationToken)
+    {
+        var period = await ResolvePeriodAsync(query, cancellationToken);
+        var competitions = await LoadCompetitionsAsync(period, query, cancellationToken);
+        return CompetitionCalculator.Calculate(period, competitions, options.Value.Competition.MinSamples);
+    }
+
+    // Filters apply to the competition's own discipline and format, and competitions without fights are loaded too
+    private Task<List<CompetitionRow>> LoadCompetitionsAsync(DateRange period, AnalyticsFilterQuery query,
+        CancellationToken cancellationToken)
+    {
+        var start = period.Previous.From;
+        var end = period.To;
+
+        var competitions = db.Competitions.Where(c => c.Date >= start && c.Date <= end);
+        if (query.DisciplineId != null)
+        {
+            competitions = competitions.Where(c => c.DisciplineId == query.DisciplineId);
+        }
+
+        if (query.FormatId != null)
+        {
+            competitions = competitions.Where(c => c.FormatId == query.FormatId);
+        }
+
+        return competitions
+            .Select(c => new CompetitionRow(c.Id, c.Date, c.Name, c.Place,
+                c.Fights.Select(f => new FightRow(f.Result, f.Method,
+                    f.TechniqueId, f.Technique!.Name,
+                    (int?)f.Technique.CategoryId, f.Technique.Category.Name)).ToList()))
+            .ToListAsync(cancellationToken);
+    }
+
     // An omitted start requires the date of the earliest session or competition (one extra query)
     private async Task<DateRange> ResolvePeriodAsync(AnalyticsQuery query, CancellationToken cancellationToken)
     {
