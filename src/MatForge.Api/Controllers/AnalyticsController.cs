@@ -14,4 +14,13 @@ public class AnalyticsController(IAnalyticsService analyticsService) : Controlle
     [HttpGet("sparring")]
     public Task<SparringDto> GetSparring([FromQuery] AnalyticsFilterQuery query, CancellationToken cancellationToken) =>
         analyticsService.GetSparringAsync(query, cancellationToken);
+
+    [HttpGet("competitions")]
+    public Task<CompetitionAnalyticsDto> GetCompetitions([FromQuery] AnalyticsFilterQuery query,
+        CancellationToken cancellationToken) =>
+        analyticsService.GetCompetitionsAsync(query, cancellationToken);
+
+    [HttpGet("insights")]
+    public Task<InsightsDto> GetInsights([FromQuery] AnalyticsFilterQuery query, CancellationToken cancellationToken) =>
+        analyticsService.GetInsightsAsync(query, cancellationToken);
 }

@@ -27,3 +27,18 @@ public record RoundRow(
     string? CategoryName,
     int? PositionId,
     string? PositionName);
+
+// Competitions without fights still count in competitions, medals and the timeline
+public record CompetitionRow(int Id, DateOnly Date, string Name, int? Place, List<FightRow> Fights);
+
+// Method is null for draws, while technique and category are null when not recorded
+public record FightRow(
+    FightResult Result,
+    FightMethod? Method,
+    int? TechniqueId,
+    string? TechniqueName,
+    int? CategoryId,
+    string? CategoryName);
+
+// Dictionary entries included in distributions but excluded from insight rules
+public record OtherEntries(int TechniqueId, int CategoryId, int PositionId);

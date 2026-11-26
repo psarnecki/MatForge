@@ -10,7 +10,7 @@ public class AnalyticsQuery
     public DateOnly? To { get; init; }
 }
 
-// Both filters are optional and limit the data to matching grappling sessions
+// Both filters are optional and limit the data to matching grappling sessions and competitions
 public class AnalyticsFilterQuery : AnalyticsQuery
 {
     public int? DisciplineId { get; init; }
@@ -64,3 +64,59 @@ public record TrendDto(Bucket Bucket, List<TrendPointDto> Points, PreviousPeriod
 public record TrendPointDto(DateOnly Start, int Rounds, int Wins, int Losses, int Draws, decimal? WinRate);
 
 public record PreviousPeriodDto(int Rounds, decimal? WinRate);
+
+public record CompetitionAnalyticsDto(
+    FightTotalsDto Totals,
+    MethodsDto Methods,
+    FightFinishesDto FinishesFor,
+    FightFinishesDto FinishesAgainst,
+    List<TimelineItemDto> Timeline,
+    PreviousFightsDto Previous,
+    decimal? WinRateDelta);
+
+public record FightTotalsDto(
+    int Competitions,
+    int Fights,
+    int Wins,
+    int Losses,
+    int Draws,
+    decimal? WinRate,
+    int Gold,
+    int Silver,
+    int Bronze);
+
+public record MethodsDto(List<MethodGroupDto> Wins, List<MethodGroupDto> Losses);
+
+public record MethodGroupDto(FightMethod Method, int Count, decimal Share);
+
+public record FightFinishesDto(int Total, List<FinishGroupDto> ByTechnique, List<FinishGroupDto> ByCategory);
+
+public record TimelineItemDto(int CompetitionId, DateOnly Date, string Name, int? Place, int Fights, int Wins, int Losses);
+
+public record PreviousFightsDto(int Fights, decimal? WinRate);
+
+public record InsightsDto(SideInsightsDto Training, SideInsightsDto Competition, List<InsightDto> Comparison);
+
+// Samples are the rounds or fights in the period, items are empty with too few samples
+public record SideInsightsDto(InsightStatus Status, int Samples, int MinSamples, List<InsightDto> Items);
+
+// The UI builds the sentence from the rule code and its params
+public record InsightDto(string Rule, InsightType Type, object Params);
+
+public record WinRateChangeDto(decimal WinRate, decimal PreviousWinRate, decimal Delta);
+
+public record WinRateGapDto(decimal TrainingWinRate, decimal CompetitionWinRate, decimal Delta);
+
+public enum InsightStatus
+{
+    Ok,
+    InsufficientData
+}
+
+public enum InsightType
+{
+    Strength,
+    Weakness,
+    Trend,
+    Info
+}

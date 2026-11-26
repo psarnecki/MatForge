@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using FluentValidation;
 using MatForge.Api.Infrastructure;
 using MatForge.Application.Features.Analytics;
+using MatForge.Application.Features.Analytics.Rules;
 using MatForge.Application.Features.Clubs;
 using MatForge.Application.Features.Competitions;
 using MatForge.Application.Features.Lookups;
@@ -12,6 +13,7 @@ using MatForge.Data.Entities;
 using MatForge.Data.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,8 +42,19 @@ builder.Services.AddScoped<ICompetitionService, CompetitionService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddOptions<AnalyticsRulesOptions>()
     .Bind(builder.Configuration.GetSection(AnalyticsRulesOptions.Section))
-    .Validate(options => options.Training.MinSamples >= 1, "Analytics:Rules:Training:MinSamples must be at least 1.")
     .ValidateOnStart();
+builder.Services.AddSingleton<IValidateOptions<AnalyticsRulesOptions>, AnalyticsRulesOptionsValidator>();
+
+// Insight rules in catalog order, which is the order of the items in each section
+builder.Services.AddSingleton<IInsightRule, DominantFinisherTechniqueRule>();
+builder.Services.AddSingleton<IInsightRule, DominantFinisherCategoryRule>();
+builder.Services.AddSingleton<IInsightRule, RecurringLossTechniqueRule>();
+builder.Services.AddSingleton<IInsightRule, RecurringLossCategoryRule>();
+builder.Services.AddSingleton<IInsightRule, StrongPositionRule>();
+builder.Services.AddSingleton<IInsightRule, VulnerablePositionRule>();
+builder.Services.AddSingleton<IInsightRule, ImprovingWinRateRule>();
+builder.Services.AddSingleton<IInsightRule, DecliningWinRateRule>();
+builder.Services.AddSingleton<IInsightRule, CompetitionVsTrainingGapRule>();
 
 builder.Services.AddScoped<IValidator<UpdateBeltsRequest>, UpdateBeltsRequestValidator>();
 builder.Services.AddScoped<IValidator<SessionRequest>, SessionRequestValidator>();

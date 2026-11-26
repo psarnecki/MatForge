@@ -81,6 +81,5 @@ public static class SparringCalculator
     private static decimal? WinRateDelta(RoundTotalsDto current, RoundTotalsDto previous, int minSamples) =>
         current.Rounds < minSamples || previous.Rounds < minSamples
             ? null
-            : AnalyticsMath.RoundFraction(
-                (decimal)current.Wins / current.Rounds - (decimal)previous.Wins / previous.Rounds);
+            : AnalyticsMath.RateDifference(current.Wins, current.Rounds, previous.Wins, previous.Rounds);
 }
