@@ -67,9 +67,10 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Accept: **GT-01 (insights part), GT-02, GT-06** pass; one unit test per rule (fires / does not fire at the boundary values); thresholds are only read from configuration.
 - Also done here (D-45): startup validation of every threshold, `samples` and `minSamples` on each insights side, "Other" entries found by their codes, the timeline and method order.
 
-**T13 Analytics hardening** [03 §9] (MUST)
-- Validation of the filters `disciplineId` and `formatId` (unknown id, format of another discipline; the filters and the `from`/`to` validation are done in T11, D-44), isolation tests for all four endpoints, performance check with 5 years of generated data (under 500 ms).
-- Accept: all analytics tests green; query plan reviewed (projections, no tracking).
+**T13 Analytics hardening** [03 §9] (MUST, done)
+- Validation of the filters `disciplineId` and `formatId` (unknown id, format of another discipline; the filters and the `from`/`to` validation are done in T11, D-44), isolation tests for all four endpoints.
+- Accept: all analytics tests green.
+- Moved after T10 (they need its generated data, D-46): performance check with 5 years of generated data (under 500 ms) and the query plan review (projections, no tracking).
 
 ## Phase 5: Dashboard and goals
 
