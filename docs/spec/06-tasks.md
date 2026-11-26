@@ -51,8 +51,9 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Service, validators (I-01, I-04, I-10), controller, list, form with fights, delete with 409 rule.
 - Accept: CRUD with fights; technique only for Submission, Throw, or Pin, and only from categories offered in the competition's discipline; integration tests including isolation; usable at 390 px.
 
-**T10 Demo data seeder** [05 §2] (SHOULD)
-- Deterministic generator: user `demo@matforge.com` with the password `Demo1234!` (it meets the default Identity password rules); a history of about 6 months that **ends on the day the app starts**, so the dashboard's default 90 days always has data; 3-5 sessions per week; sparring rounds with a realistic distribution (a favorite finish, one recurring weakness, a gradual win-rate improvement); 3 competitions; 2 goals. The layout of sessions and results is the same every time, relative to the end date (`new Random(42)`). The seeder does nothing if the demo user already exists.
+**T10 Demo data seeder** [05 §2] (SHOULD, done)
+- Deterministic generator (D-47): user `demo@matforge.com` with the password `Demo1234!` (it meets the default Identity password rules); a history of 5 years that **ends on the day of the first start with demo data**, so the dashboard's default 90 days has data on that day; 5-6 grappling and 2-3 other sessions per week; sparring rounds with a realistic distribution (a favorite finish, one recurring weakness, a gradual win-rate improvement, draws); 26 competitions with fights, one of them upcoming. The layout of sessions and results is the same every time, relative to the week of the end date (`new Random(42)`). The seeder does nothing if the demo user already exists. Goals, materials, and measurements are added in T16-T18.
+- Also done here (D-47): the performance check and the query plan review moved from T13.
 - Accept: with `Seed__DemoData=true`, a fresh start produces the same layout relative to the end date; a second start duplicates nothing; analytics later produce at least one strength and one weakness insight.
 
 ## Phase 4: Analytics backend
@@ -70,7 +71,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 **T13 Analytics hardening** [03 §9] (MUST, done)
 - Validation of the filters `disciplineId` and `formatId` (unknown id, format of another discipline; the filters and the `from`/`to` validation are done in T11, D-44), isolation tests for all four endpoints.
 - Accept: all analytics tests green.
-- Moved after T10 (they need its generated data, D-46): performance check with 5 years of generated data (under 500 ms) and the query plan review (projections, no tracking).
+- Moved after T10 (they need its generated data, D-46), done there (D-47): performance check with 5 years of generated data (under 500 ms; measured median 5-17 ms, maximum 53 ms) and the query plan review (projections, no tracking; no change needed).
 
 ## Phase 5: Dashboard and goals
 
@@ -84,15 +85,18 @@ Work in order. Each task is a small, testable increment with its own Definition 
 
 **T16 Goals** [01 §4.8, 02 §7, 03 §8, 04 §4.6] (MUST)
 - Goal calculator taking `today` as a parameter, service, validators (I-06), controller, UI.
+- Demo data: the demo seeder also creates 2 goals for the demo user (D-47).
 - Accept: **GT-05** passes; competition used by a goal cannot be deleted (409); archive works.
 
 ## Phase 6: Remaining modules and polish
 
 **T17 Materials library** [01 §4.9, 02 §8, 04 §4.7] (MUST)
 - Source detection with unit tests (including subdomains such as `www.`, `m.`, `vm.tiktok.com`, `fb.watch`), CRUD, status quick change, filters.
+- Demo data: the demo seeder also creates a few sample materials for the demo user (D-47).
 
 **T18 Body measurements** [01 §4.10, 02 §9, 04 §4.8] (MUST)
 - CRUD with unique date rule, chart.
+- Demo data: the demo seeder also creates a few sample measurements for the demo user (D-47).
 
 **T19 Mobile and design polish** [04] (MUST)
 - Review every screen at 360, 390, 768, and 1440 px against `docs/design/` and the "do not do this" list; keyboard focus; contrast check; `prefers-reduced-motion`.
@@ -112,6 +116,7 @@ Work in order. Each task is a small, testable increment with its own Definition 
 - Notes for the thesis text: where validation rules live and why (D-35: validators that query the database for `400`, services for `409`, compared with the author's VetClinic and MartialHub projects).
 - Notes for the thesis text, non-functional requirements: basic accessibility level (D-41): sufficient text contrast (4.5:1), labels on buttons for screen readers and keyboard operation are applied; no accessibility audit or certification is in scope, because the concept does not require it and time is limited.
 - A short root `README.md` (a few lines): what the project is, `docker compose up --build`, the demo login, how to run the tests, and how to set the development connection string with `dotnet user-secrets` for running the API from the IDE (D-30). A fuller README with screenshots is optional (`08-optional.md`).
+- The README says that the demo data ends on the day of the first start and how to recreate it: delete the demo account (Profile → Delete account) or run `docker compose down -v`, then start again (D-47).
 
 **T22 Buffer and release** (MUST)
 - Bug fixes only. Fresh clone → `docker compose up --build` → demo works. Before the defense, build the images while online (`docker compose build`), then check the demo with the network disconnected. Tag `v1.0`.

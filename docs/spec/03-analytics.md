@@ -231,6 +231,6 @@ Golden cases (GT-05): `TrainingCount`, target 20, 2026-10-01..2026-10-31, 12 ses
 
 ## 9. Performance and correctness notes
 
-- Analytics must answer in under 500 ms for 5 years of data of one user (about 1500 sessions) on a laptop. Load only needed columns (`Select` projection); no entity tracking.
+- Analytics must answer in under 500 ms for 5 years of data of one user (about 1,800 sessions in the demo data) on a laptop. Measured on the demo data with a Release build: median 5-17 ms, maximum 53 ms for all four endpoints and every period preset (D-47). Load only needed columns (`Select` projection); no entity tracking.
 - All percentages in the API are fractions; only the UI formats them.
 - Empty data never throws: empty lists, zero totals, `null` rates.
